@@ -1,7 +1,7 @@
-# WXPN 885 Greatest Cover Songs – Countdown Dashboard
+# 885 Greatest Cover Songs – Countdown Dashboard
 Interactive Bar-Race Dashboard Powered by D3.js
 
-This repository contains a fully client-side HTML/JavaScript dashboard that visualizes the **WXPN 885 Greatest Cover Songs Countdown**. It renders six D3 bar-race charts plus a “Current Song” display, all synced to a slider that represents the countdown rank (885 → 1).
+This repository contains a fully client-side HTML/JavaScript dashboard that visualizes the **885 Greatest Cover Songs Countdown**. It renders six D3 bar-race charts plus a “Current Song” display, all synced to a slider that represents the countdown rank (885 → 1).
 
 The dashboard is designed to run entirely in the browser — no server required — and can be hosted directly on **GitHub Pages**.
 
@@ -39,14 +39,14 @@ The dashboard is designed to run entirely in the browser — no server required 
 ---
 
 ### ✓ Data-driven
-The dashboard reads a JSON file containing WXPN countdown data.  
+The dashboard reads a JSON file containing 885 countdown data.  
 You can supply your own via:
 
 `...?data_endpoint=url_to_file.json`
 
 Example:
 
-`https://yourusername.github.io/wxpn-885-dashboard/?data_endpoint=data/wxpn_885.json`
+`https://yourusername.github.io/885coversongs/?data_endpoint=data/wxpn_885.json`
 
 ---
 
@@ -104,8 +104,8 @@ A missing or malformed `releaseDate` affects only the Cover Years chart (current
 Clone the repo:
 
 ```sh
-git clone https://github.com/ericknappe/wxpn-885-dashboard.git
-cd wxpn-885-dashboard
+git clone https://github.com/ericknappe/885coversongs.git
+cd 885coversongs
 ```
 
 Open `index.html` directly in a browser:
@@ -126,11 +126,11 @@ No build tools required.
 
 Your dashboard becomes available at:
 
-`https://yourusername.github.io/wxpn-885-dashboard/`
+`https://yourusername.github.io/885coversongs/`
 
 To use a custom dataset:
 
-`https://yourusername.github.io/wxpn-885-dashboard/?data_endpoint=data/wxpn_885.json`
+`https://yourusername.github.io/885coversongs/?data_endpoint=data/wxpn_885.json`
 
 ---
 
