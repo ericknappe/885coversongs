@@ -104,7 +104,7 @@ A missing or malformed `releaseDate` affects only the Cover Years chart (current
 Clone the repo:
 
 ```sh
-git clone https://github.com/yourusername/wxpn-885-dashboard.git
+git clone https://github.com/ericknappe/wxpn-885-dashboard.git
 cd wxpn-885-dashboard
 ```
 
