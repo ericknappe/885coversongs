@@ -5,9 +5,8 @@
   <title>WXPN 885 Greatest Cover Songs – Countdown Dashboard</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -17,6 +16,7 @@
       flex-direction: column;
       height: 100vh;
     }
+
     header {
       padding: 6px 0 2px;
       text-align: center;
@@ -27,6 +27,7 @@
       font-weight: 600;
       color: #f5f5f5;
     }
+
     #controls {
       padding: 4px 0 8px;
       background: #111;
@@ -49,9 +50,6 @@
       white-space: nowrap;
       font-size: 13px;
     }
-    #frameSlider {
-      flex: 1;
-    }
     #frameLabel {
       min-width: 60px;
       text-align: right;
@@ -59,23 +57,56 @@
       font-size: 13px;
     }
 
+    /* Finger-friendly slider */
+    #frameSlider {
+      flex: 1;
+      height: 20px;
+      -webkit-appearance: none;
+      background: transparent;
+      touch-action: pan-y; /* allow vertical scroll while still draggable */
+    }
+    #frameSlider::-webkit-slider-runnable-track {
+      height: 6px;
+      background: #444;
+      border-radius: 999px;
+    }
+    #frameSlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #eee;
+      border: 2px solid #111;
+      margin-top: -8px;
+    }
+    #frameSlider::-moz-range-track {
+      height: 6px;
+      background: #444;
+      border-radius: 999px;
+    }
+    #frameSlider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #eee;
+      border: 2px solid #111;
+    }
+
+    /* Grid that can collapse tiles down to header-only */
     #dashboard {
       flex: 1;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: minmax(0, 1fr);
+      grid-auto-rows: 42px;     /* base row unit */
+      grid-auto-flow: dense;    /* pack collapsed tiles upward */
       gap: 6px;
       padding: 6px;
     }
     @media (max-width: 1200px) {
-      #dashboard {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      #dashboard { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 800px) {
-      #dashboard {
-        grid-template-columns: 1fr;
-      }
+      #dashboard { grid-template-columns: 1fr; }
     }
 
     .cell {
@@ -87,7 +118,12 @@
       flex-direction: column;
       overflow: hidden;
       cursor: move;
+      min-height: 0;
     }
+
+    .cell.is-expanded { grid-row: span 8; }  /* tune tile height */
+    .cell.is-collapsed { grid-row: span 1; padding-bottom: 0; }
+    .cell.is-collapsed .cell-header { margin-bottom: 0; }
 
     .cell-header {
       display: flex;
@@ -114,9 +150,7 @@
       color: #eee;
       cursor: pointer;
     }
-    .cell-toggle:hover {
-      background: #333;
-    }
+    .cell-toggle:hover { background: #333; }
 
     .cell-body {
       flex: 1;
@@ -124,11 +158,6 @@
       flex-direction: column;
       min-height: 0;
     }
-
-    #cell7 {
-      display: none !important;
-    }
-
     .chart-container {
       flex: 1;
       position: relative;
@@ -148,11 +177,13 @@
       justify-content: center;
       text-align: center;
       gap: 8px;
+      min-height: 0;
     }
 
+    /* Fixed-height album-art to avoid layout jumps */
     #current-song img {
       max-width: 80%;
-      height: 220px;          /* fixed height to avoid layout jumps */
+      height: 220px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.7);
       object-fit: cover;
@@ -160,7 +191,7 @@
       transition: opacity 0.2s ease-in-out;
     }
     #current-song img.no-art {
-      opacity: 0;
+      opacity: 0;         /* keep reserved space */
       box-shadow: none;
     }
 
@@ -183,9 +214,19 @@
     }
 
     @media (pointer: coarse) {
-      .cell {
-        cursor: default;
-      }
+      .cell { cursor: default; }
+    }
+
+    /* Mobile readability */
+    @media (max-width: 800px) {
+      header h1 { font-size: 18px; }
+      .cell-title { font-size: 15px; }
+      #controls-inner { padding: 6px 14px; }
+
+      /* current song text */
+      #current-song .song-title { font-size: 17px; }
+      #current-song .song-artist { font-size: 15px; }
+      #current-song .song-meta { font-size: 14px; }
     }
   </style>
 </head>
@@ -197,7 +238,7 @@
   <div id="controls">
     <div id="controls-inner">
       <label for="frameSlider">Song number:</label>
-      <input type="range" id="frameSlider" min="0" max="0" value="0" />
+      <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
       <div id="frameLabel">0</div>
     </div>
   </div>
@@ -268,7 +309,7 @@
       </div>
     </div>
 
-    <!-- Slot 7: Cover years chart, hidden by default -->
+    <!-- Slot 7: Cover years chart, collapsed by default -->
     <div class="cell draggable-cell" id="cell7">
       <div class="cell-header">
         <span class="cell-title">Most Frequent Cover Years</span>
@@ -300,18 +341,25 @@
     const TOP_N_YEARS = 15;
 
     const MAX_LABEL_CHARS = 25;
+    const BAR_HEIGHT_FACTOR = 1 / 3;
 
     const frameSlider = document.getElementById("frameSlider");
     const frameLabel = document.getElementById("frameLabel");
+
     const currentAlbumArt = document.getElementById("current-album-art");
     const currentSongTitle = document.getElementById("current-song-title");
     const currentSongArtist = document.getElementById("current-song-artist");
     const currentSongMeta = document.getElementById("current-song-meta");
 
     const urlParams = new URLSearchParams(window.location.search);
-    const DATA_ENDPOINT = urlParams.get("data_endpoint") || "https://origin.xpn.org/countdown/2025/json/cd2025.json";
+    const DATA_ENDPOINT = urlParams.get("data_endpoint") || "data/wxpn_885.json";
 
-    const BAR_HEIGHT_FACTOR = 1 / 3;
+    let sortedSongs = [];
+    let frameRanks = [];
+    let metrics = [];
+    let metricState = {};
+    let currentFrameIndex = 0;
+    let initialized = false;
 
     function truncateLabel(label, maxLen) {
       if (!label) return "";
@@ -336,12 +384,14 @@
       return result;
     }
 
-    // New, more forgiving year parser for releaseDate
+    // Conservative year parsing: takes first 4 chars if it's YYYY
     function parseYearFromString(value) {
       if (value === null || value === undefined) return null;
-      const match = String(value).match(/(18|19|20)\d{2}/);
-      if (!match) return null;
-      const year = parseInt(match[0], 10);
+      const s = String(value).trim();
+      if (s.length < 4) return null;
+      const y = s.slice(0, 4);
+      if (!/^\d{4}$/.test(y)) return null;
+      const year = parseInt(y, 10);
       if (isNaN(year) || year < 1800 || year > 2100) return null;
       return year;
     }
@@ -357,44 +407,38 @@
       let maxVal = 0;
       framesCounts.forEach(frame => {
         Object.values(frame).forEach(v => {
-          if (v != null && v >= minDisplay && v > maxVal) {
-            maxVal = v;
-          }
+          if (v != null && v >= minDisplay && v > maxVal) maxVal = v;
         });
       });
       return maxVal;
     }
 
-    function buildMetricTimeSeries(sortedSongs, categoryFn, minCountFinal) {
+    function buildMetricTimeSeries(sortedRows, categoryFn, minCountFinal) {
       const finalCounts = new Map();
-      sortedSongs.forEach(row => {
+      sortedRows.forEach(row => {
         const cats = categoryFn(row) || [];
         cats.forEach(cat => {
           if (cat === null || cat === undefined || cat === "") return;
-          const prev = finalCounts.get(cat) || 0;
-          finalCounts.set(cat, prev + 1);
+          finalCounts.set(cat, (finalCounts.get(cat) || 0) + 1);
         });
       });
 
       const allowed = new Set(
         Array.from(finalCounts.entries())
-          .filter(([c, cnt]) => cnt >= minCountFinal)
+          .filter(([, cnt]) => cnt >= minCountFinal)
           .map(([c]) => c)
       );
 
       const frames = [];
       const currentCounts = new Map();
-      sortedSongs.forEach(row => {
+      sortedRows.forEach(row => {
         const cats = categoryFn(row) || [];
         cats.forEach(cat => {
           if (!allowed.has(cat)) return;
-          const prev = currentCounts.get(cat) || 0;
-          currentCounts.set(cat, prev + 1);
+          currentCounts.set(cat, (currentCounts.get(cat) || 0) + 1);
         });
         const snapshot = {};
-        currentCounts.forEach((v, k) => {
-          snapshot[k] = v;
-        });
+        currentCounts.forEach((v, k) => { snapshot[k] = v; });
         frames.push(snapshot);
       });
 
@@ -417,13 +461,9 @@
       const height = svg.node().clientHeight || 200;
 
       let marginLeft;
-      if (width <= 500) {
-        marginLeft = 130;
-      } else if (width <= 900) {
-        marginLeft = 150;
-      } else {
-        marginLeft = 165;
-      }
+      if (width <= 500) marginLeft = 130;
+      else if (width <= 900) marginLeft = 150;
+      else marginLeft = 165;
 
       const margin = { top: 4, right: 8, bottom: 18, left: marginLeft };
       const innerWidth = width - margin.left - margin.right;
@@ -448,6 +488,7 @@
         .tickValues(ticks)
         .tickSize(-innerHeight)
         .tickFormat("");
+
       g.append("g")
         .attr("class", "x-grid")
         .attr("transform", `translate(0,${innerHeight})`)
@@ -459,6 +500,7 @@
       const xAxis = d3.axisBottom(xScale)
         .tickValues(ticks)
         .tickFormat(d3.format("d"));
+
       g.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${innerHeight})`)
@@ -467,37 +509,25 @@
         .attr("fill", "#ccc")
         .attr("font-size", 9);
 
+      // Make axis labels readable on mobile too
+      // (we don't hardcode colors; just size)
+      g.selectAll(".x-axis text").classed("x-axis-text", true);
+
       const slotHeight = innerHeight / topN;
       const barHeight = slotHeight * BAR_HEIGHT_FACTOR;
 
+      // 20-ish distinct colors
       const colorRange = d3.schemeTableau10.concat(d3.schemeSet3);
       const domainCats = Array.from(allowedSet).sort((a, b) =>
         String(a).localeCompare(String(b))
       );
       const colorScale = d3.scaleOrdinal(colorRange).domain(domainCats);
 
-      return {
-        svg,
-        g,
-        innerWidth,
-        innerHeight,
-        xScale,
-        slotHeight,
-        barHeight,
-        topN,
-        colorScale
-      };
+      return { svg, g, innerWidth, innerHeight, xScale, slotHeight, barHeight, topN, colorScale };
     }
 
     function updateChart(chart, frameCounts, prevFrameCounts, allowedSet, labelFn, fullLabelFn, options) {
-      const {
-        slotHeight,
-        barHeight,
-        xScale,
-        g,
-        topN,
-        colorScale
-      } = chart;
+      const { slotHeight, barHeight, xScale, g, topN, colorScale } = chart;
 
       const minDisplay = options.minDisplayCount;
       const fastThreshold = options.fastRiserThreshold;
@@ -515,6 +545,7 @@
         return;
       }
 
+      // bottom-up fill
       const startSlot = topN - count;
       const slotPositions = d3.range(count).map(i => {
         const slotIndex = startSlot + i;
@@ -530,8 +561,7 @@
         });
       }
 
-      const bars = g.selectAll("rect.bar")
-        .data(ordered, d => d[0]);
+      const bars = g.selectAll("rect.bar").data(ordered, d => d[0]);
 
       bars.enter()
         .append("rect")
@@ -548,8 +578,7 @@
 
       bars.exit().remove();
 
-      const labels = g.selectAll("text.y-label")
-        .data(ordered, d => d[0]);
+      const labels = g.selectAll("text.y-label").data(ordered, d => d[0]);
 
       const labelsEnter = labels.enter()
         .append("text")
@@ -560,13 +589,7 @@
         .attr("text-anchor", "end")
         .attr("alignment-baseline", "middle")
         .attr("fill", "#eee")
-        .attr("font-size", 10)
-        .text(d => {
-          const cat = d[0];
-          const base = labelFn(cat);
-          const truncated = truncateLabel(base, MAX_LABEL_CHARS);
-          return (fastSet.has(cat) ? "↑ " : "") + truncated;
-        });
+        .attr("font-size", 10);
 
       const labelsMerged = labelsEnter.merge(labels)
         .attr("y", (d, i) => slotPositions[i] + barHeight / 2)
@@ -575,15 +598,12 @@
           const base = labelFn(cat);
           const truncated = truncateLabel(base, MAX_LABEL_CHARS);
           return (fastSet.has(cat) ? "↑ " : "") + truncated;
-        });
+        })
+        .attr("font-weight", d => fastSet.has(d[0]) ? "bold" : "normal");
 
       labels.exit().remove();
 
-      labelsMerged.attr("font-weight", d => {
-        const cat = d[0];
-        return fastSet.has(cat) ? "bold" : "normal";
-      });
-
+      // Tooltip for full label where desired
       if (typeof fullLabelFn === "function") {
         labelsMerged.each(function(d) {
           const cat = d[0];
@@ -594,9 +614,7 @@
             if (!title.empty()) title.remove();
             return;
           }
-          if (title.empty()) {
-            title = sel.append("title");
-          }
+          if (title.empty()) title = sel.append("title");
           title.text(fullText);
         });
       } else {
@@ -613,12 +631,11 @@
       return cleanLabelText(cat);
     }
 
+    // --- Drag-and-drop (desktop only) -----------------------------------
     function initDragAndDrop() {
       const dashboard = document.getElementById("dashboard");
       const finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
-      if (!finePointer) {
-        return;
-      }
+      if (!finePointer) return;
 
       let dragSrcEl = null;
 
@@ -642,50 +659,137 @@
           const rect = cell.getBoundingClientRect();
           const offset = e.clientY - rect.top;
           const midpoint = rect.height / 2;
-          if (offset > midpoint) {
-            dashboard.insertBefore(dragSrcEl, cell.nextSibling);
-          } else {
-            dashboard.insertBefore(dragSrcEl, cell);
-          }
+          if (offset > midpoint) dashboard.insertBefore(dragSrcEl, cell.nextSibling);
+          else dashboard.insertBefore(dragSrcEl, cell);
         });
       });
     }
 
+    // --- Hide/show that collapses tile height ----------------------------
     function initCellToggles() {
-      document.querySelectorAll(".cell-toggle").forEach(btn => {
+      document.querySelectorAll(".cell").forEach(cell => {
+        const btn = cell.querySelector(".cell-toggle");
+        const body = cell.querySelector(".cell-body");
+        if (!btn || !body) return;
+
+        const initiallyHidden = body.style.display === "none";
+        cell.classList.toggle("is-collapsed", initiallyHidden);
+        cell.classList.toggle("is-expanded", !initiallyHidden);
+        btn.textContent = initiallyHidden ? "Show" : "Hide";
+
         btn.addEventListener("click", () => {
-          const cell = btn.closest(".cell");
-          const body = cell.querySelector(".cell-body");
-          if (!body) return;
           const isHidden = body.style.display === "none";
           body.style.display = isHidden ? "" : "none";
+
+          cell.classList.toggle("is-collapsed", !isHidden);
+          cell.classList.toggle("is-expanded", isHidden);
+
           btn.textContent = isHidden ? "Hide" : "Show";
+
+          // layout changed; rebuild charts so widths/heights are correct
+          if (initialized) rebuildChartsAndRedraw();
         });
       });
     }
 
+    // --- Option A: one-song stepping ------------------------------------
+    function stepSlider(delta) {
+      const min = Number(frameSlider.min);
+      const max = Number(frameSlider.max);
+      const cur = Number(frameSlider.value) || 0;
+      const next = Math.max(min, Math.min(max, cur + delta));
+      if (next !== cur) {
+        frameSlider.value = String(next);
+        frameSlider.dispatchEvent(new Event("input"));
+      }
+    }
+
+    function initKeyboardStepping() {
+      window.addEventListener("keydown", (e) => {
+        const tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+        if (e.key === "ArrowLeft") stepSlider(-1);
+        if (e.key === "ArrowRight") stepSlider(1);
+        if (e.key === "PageUp") stepSlider(-10);
+        if (e.key === "PageDown") stepSlider(10);
+      });
+    }
+
+    function initSwipeStepping() {
+      let touchStartX = null;
+
+      document.addEventListener("touchstart", (e) => {
+        if (!e.touches || !e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      document.addEventListener("touchend", (e) => {
+        if (touchStartX === null) return;
+        const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : null;
+        if (endX === null) return;
+
+        const dx = endX - touchStartX;
+        touchStartX = null;
+
+        // Only treat as swipe if intentional
+        if (Math.abs(dx) < 40) return;
+
+        if (dx > 0) stepSlider(-1); // swipe right = previous
+        else stepSlider(1);         // swipe left  = next
+      }, { passive: true });
+    }
+
+    // --- Rebuild charts on resize/layout change --------------------------
+    function rebuildChartsAndRedraw() {
+      // Recreate chart objects for current sizes
+      metrics.forEach(metric => {
+        const state = metricState[metric.id];
+        const svgEl = document.getElementById(metric.svgId);
+        if (!svgEl) return;
+
+        // If the cell is collapsed, chart may be 0 height; still safe to build.
+        state.chart = setupChart(svgEl, metric.topN, state.globalMax, state.allowed);
+      });
+
+      // Redraw current frame
+      updateDashboard(currentFrameIndex);
+    }
+
+    function initResizeHandler() {
+      let t = null;
+      window.addEventListener("resize", () => {
+        if (!initialized) return;
+        clearTimeout(t);
+        t = setTimeout(() => rebuildChartsAndRedraw(), 80);
+      });
+    }
+
+    // --- Main ------------------------------------------------------------
     async function init() {
       initCellToggles();
       initDragAndDrop();
+      initKeyboardStepping();
+      initSwipeStepping();
+      initResizeHandler();
 
       try {
         const resp = await fetch(DATA_ENDPOINT);
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-        if (!Array.isArray(data)) {
-          throw new Error("Data endpoint must return an array");
-        }
+        if (!Array.isArray(data)) throw new Error("Data endpoint must return an array");
 
         const raw = data.map(d => ({ ...d }));
         raw.forEach(row => {
           row.rank = row.rank != null ? Number(row.rank) : null;
           row.genre_list = parsePhpGenre(row.genre);
-          row.originalYear_parsed =
-            row.originalYear != null ? Number(row.originalYear) : null;
+
+          row.originalYear_parsed = row.originalYear != null ? Number(row.originalYear) : null;
           if (isNaN(row.originalYear_parsed)) row.originalYear_parsed = null;
+
+          // cover year from releaseDate (your data samples: YYYY)
           row.coverYear_parsed = parseYearFromString(row.releaseDate);
+
           row.originalDecade = computeDecade(row.originalYear_parsed);
 
           const song = row.song || null;
@@ -705,10 +809,11 @@
           return;
         }
 
-        const sortedSongs = filtered.slice().sort((a, b) => d3.descending(a.rank, b.rank));
-        const frameRanks = sortedSongs.map(row => row.rank);
+        // ranks descending: 885 -> 1
+        sortedSongs = filtered.slice().sort((a, b) => d3.descending(a.rank, b.rank));
+        frameRanks = sortedSongs.map(row => row.rank);
 
-        const metrics = [
+        metrics = [
           {
             id: "origArtists",
             svgId: "chart-orig-artists",
@@ -743,7 +848,7 @@
             minFinal: MIN_COUNT_ORIG_SONG,
             topN: TOP_N_ORIG_SONGS,
             labelFn: labelDefault,
-            fullLabelFn: (cat) => cleanLabelText(cat)
+            fullLabelFn: (cat) => cleanLabelText(cat) // tooltip full text
           },
           {
             id: "origDecades",
@@ -765,22 +870,14 @@
           }
         ];
 
-        const metricState = {};
+        metricState = {};
 
         metrics.forEach(metric => {
-          const { frames, allowed } = buildMetricTimeSeries(
-            sortedSongs,
-            metric.categoryFn,
-            metric.minFinal
-          );
+          const { frames, allowed } = buildMetricTimeSeries(sortedSongs, metric.categoryFn, metric.minFinal);
           const globalMax = computeGlobalMax(frames, MIN_DISPLAY_COUNT);
 
-          const chart = setupChart(
-            document.getElementById(metric.svgId),
-            metric.topN,
-            globalMax,
-            allowed
-          );
+          const svgEl = document.getElementById(metric.svgId);
+          const chart = svgEl ? setupChart(svgEl, metric.topN, globalMax, allowed) : null;
 
           metricState[metric.id] = {
             frames,
@@ -796,65 +893,74 @@
         frameSlider.min = 0;
         frameSlider.max = numFrames - 1;
         frameSlider.value = 0;
-
-        function updateDashboard(frameIndex) {
-          frameIndex = Math.max(0, Math.min(numFrames - 1, frameIndex));
-          const rank = frameRanks[frameIndex];
-          frameLabel.textContent = rank != null ? String(rank) : "";
-
-          metrics.forEach(metric => {
-            const state = metricState[metric.id];
-            const frameCounts = state.frames[frameIndex] || {};
-            const prevIndex = Math.max(0, frameIndex - MOMENTUM_WINDOW);
-            const prevCounts = state.frames[prevIndex] || {};
-            updateChart(
-              state.chart,
-              frameCounts,
-              prevCounts,
-              state.allowed,
-              state.labelFn,
-              state.fullLabelFn,
-              {
-                minDisplayCount: MIN_DISPLAY_COUNT,
-                fastRiserThreshold: FAST_RISER_THRESHOLD
-              }
-            );
-          });
-
-          const songRow = sortedSongs[frameIndex];
-          const imgUrl = songRow.albumArt || "";
-
-          if (imgUrl) {
-            currentAlbumArt.classList.remove("no-art");
-            currentAlbumArt.src = imgUrl;
-            currentAlbumArt.alt = `${cleanLabelText(songRow.song || "")} – ${cleanLabelText(songRow.artist || "")}`;
-          } else {
-            currentAlbumArt.classList.add("no-art");
-            currentAlbumArt.alt = "";
-          }
-
-          const title = cleanLabelText(songRow.song || "(Unknown song)");
-          const artist = cleanLabelText(songRow.artist || "(Unknown cover artist)");
-          const origArtist = cleanLabelText(songRow.originalArtist || "(Unknown original artist)");
-          const origYear = songRow.originalYear_parsed || "Unknown year";
-          const coverYear = songRow.coverYear_parsed || "Unknown cover year";
-
-          currentSongTitle.textContent = title;
-          currentSongArtist.textContent = `${artist} (covering ${origArtist})`;
-          currentSongMeta.textContent =
-            `Rank ${songRow.rank} · Original year: ${origYear} · Cover year: ${coverYear}`;
-        }
+        currentFrameIndex = 0;
 
         frameSlider.addEventListener("input", e => {
           const idx = Number(e.target.value) || 0;
           updateDashboard(idx);
         });
 
+        initialized = true;
         updateDashboard(0);
+
       } catch (err) {
         console.error(err);
         frameLabel.textContent = "0";
       }
+    }
+
+    function updateDashboard(frameIndex) {
+      if (!sortedSongs.length) return;
+
+      const numFrames = sortedSongs.length;
+      currentFrameIndex = Math.max(0, Math.min(numFrames - 1, frameIndex));
+
+      const rank = frameRanks[currentFrameIndex];
+      frameLabel.textContent = rank != null ? String(rank) : "";
+
+      metrics.forEach(metric => {
+        const state = metricState[metric.id];
+        if (!state || !state.chart) return;
+
+        const frameCounts = state.frames[currentFrameIndex] || {};
+        const prevIndex = Math.max(0, currentFrameIndex - MOMENTUM_WINDOW);
+        const prevCounts = state.frames[prevIndex] || {};
+
+        updateChart(
+          state.chart,
+          frameCounts,
+          prevCounts,
+          state.allowed,
+          state.labelFn,
+          state.fullLabelFn,
+          {
+            minDisplayCount: MIN_DISPLAY_COUNT,
+            fastRiserThreshold: FAST_RISER_THRESHOLD
+          }
+        );
+      });
+
+      const songRow = sortedSongs[currentFrameIndex];
+      const imgUrl = songRow.albumArt || "";
+
+      if (imgUrl) {
+        currentAlbumArt.classList.remove("no-art");
+        currentAlbumArt.src = imgUrl;
+        currentAlbumArt.alt = `${cleanLabelText(songRow.song || "")} – ${cleanLabelText(songRow.artist || "")}`;
+      } else {
+        currentAlbumArt.classList.add("no-art");
+        currentAlbumArt.alt = "";
+      }
+
+      const title = cleanLabelText(songRow.song || "(Unknown song)");
+      const artist = cleanLabelText(songRow.artist || "(Unknown cover artist)");
+      const origArtist = cleanLabelText(songRow.originalArtist || "(Unknown original artist)");
+      const origYear = songRow.originalYear_parsed || "Unknown year";
+      const coverYear = songRow.coverYear_parsed || "Unknown cover year";
+
+      currentSongTitle.textContent = title;
+      currentSongArtist.textContent = `${artist} (covering ${origArtist})`;
+      currentSongMeta.textContent = `Rank ${songRow.rank} · Original year: ${origYear} · Cover year: ${coverYear}`;
     }
 
     init();
