@@ -174,17 +174,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       text-align: center;
       gap: 8px;
-      padding-top: 4px;
       min-height: 0;
     }
 
     /* fixed art box to prevent jumpiness */
     #current-song img {
-      max-width: 70%;
-      height: 160px;
+      max-width: 80%;
+      height: 220px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.7);
       object-fit: cover;
@@ -219,116 +218,6 @@
       padding: 0;
     }
     .spacer.is-expanded { grid-row: span 8; }
-
-    /* ===== Current Song Player ===== */
-    .player-actions { margin-top: 8px; display:flex; gap:8px; justify-content:center; }
-    .player-actions button {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #444;
-      background: #262626;
-      color: #eee;
-      cursor: pointer;
-    }
-    .player-actions button:hover { background:#333; }
-
-    .player-links { margin-top: 8px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    .player-links a {
-      text-decoration:none;
-      border:1px solid rgba(255,255,255,.16);
-      padding:4px 8px;
-      border-radius:999px;
-      color:#eee;
-      font-size: 11px;
-    }
-    .player-links a:hover { border-color: rgba(255,255,255,.28); }
-
-    .player-embed iframe {
-      width: 100%;
-      border: 0;
-      border-radius: 10px;
-      margin-top: 8px;
-      height: 120px;
-    }
-    .player-embed .play-btn {
-      margin-top: 8px;
-      width: 100%;
-      font-size: 12px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid #3a3a3a;
-      background: #1f1f1f;
-      color: #eee;
-      cursor: pointer;
-    }
-    .player-embed .play-btn:hover { background:#2a2a2a; }
-
-    .hidden { display:none !important; }
-
-    .floating-player {
-      position: fixed;
-      right: 12px;
-      bottom: 12px;
-      width: min(520px, calc(100vw - 24px));
-      max-height: calc(100vh - 24px);
-      overflow: auto;
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.45);
-      z-index: 9999;
-    }
-    .floating-bar {
-      position: sticky;
-      top: 0;
-      background: #181818;
-      padding: 8px 10px;
-      border-bottom: 1px solid #2a2a2a;
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      gap: 8px;
-    }
-    .floating-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #eee;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .floating-bar button {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #444;
-      background: #262626;
-      color: #eee;
-      cursor: pointer;
-    }
-    .floating-bar button:hover { background:#333; }
-
-    /* ===== Recent songs list ===== */
-    .recent-songs { width:100%; overflow:auto; max-height:100%; padding: 6px 10px 10px; box-sizing: border-box; }
-    .recent-table { width:100%; border-collapse: collapse; font-size: 11px; }
-    .recent-table thead th {
-      position: sticky; top: 0;
-      background: rgba(20,20,20,0.95);
-      color: #ddd;
-      text-align: left;
-      padding: 6px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      white-space: nowrap;
-    }
-    .recent-table tbody td {
-      padding: 6px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      vertical-align: top;
-    }
-    .recent-table tbody tr:hover { background: rgba(255,255,255,0.04); }
-    .recent-table td:nth-child(1) { width: 54px; opacity: 0.9; }
-
   </style>
 </head>
 
@@ -357,24 +246,10 @@
 
     <div class="cell draggable-cell is-expanded" id="cell2">
       <div class="cell-header">
-        <span class="cell-title">Current Song</span>
+        <span class="cell-title">Most Frequent Cover Artists</span>
         <button class="cell-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body">
-        <div id="current-song">
-          <img id="current-album-art" src="" alt="" class="no-art" />
-          <div class="song-title" id="current-song-title">Loading…</div>
-          <div class="song-artist" id="current-song-artist"></div>
-          <div class="song-meta" id="current-song-meta"></div>
-
-          <div id="current-player-actions" class="player-actions">
-            <button id="player-play-btn" type="button">Play</button>
-            <button id="player-detach-btn" type="button">Detach</button>
-          </div>
-          <div id="current-player-embed" class="player-embed"></div>
-          <div id="current-player-links" class="player-links"></div>
-        </div>
-      </div>
+      <div class="cell-body"><svg class="chart" id="chart-cover-artists"></svg></div>
     </div>
 
     <div class="cell draggable-cell is-expanded" id="cell3">
@@ -404,10 +279,17 @@
 
     <div class="cell draggable-cell is-expanded" id="cell6">
       <div class="cell-header">
-        <span class="cell-title">Most Frequent Cover Artists</span>
+        <span class="cell-title">Current Song</span>
         <button class="cell-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-cover-artists"></svg></div>
+      <div class="cell-body">
+        <div id="current-song">
+          <img id="current-album-art" src="" alt="" class="no-art" />
+          <div class="song-title" id="current-song-title">Loading…</div>
+          <div class="song-artist" id="current-song-artist"></div>
+          <div class="song-meta" id="current-song-meta"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Row 3 -->
@@ -427,39 +309,13 @@
       <div class="cell-body"><svg class="chart" id="chart-cover-years"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell9">
-      <div class="cell-header">
-        <span class="cell-title">Next 10 Songs</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body">
-        <div class="recent-songs">
-          <table class="recent-table">
-            <thead><tr><th>Rank</th><th>Song</th><th>Artist</th><th>Original</th></tr></thead>
-            <tbody id="recent-songs-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Floating detachable player -->
-  <div id="floating-player" class="floating-player hidden" aria-live="polite">
-    <div class="floating-bar">
-      <div class="floating-title" id="floating-title">Now Playing</div>
-      <button id="player-reattach-btn" type="button">Reattach</button>
-    </div>
-    <div style="padding:10px;">
-      <div id="floating-player-embed" class="player-embed"></div>
-      <div id="floating-player-links" class="player-links"></div>
-    </div>
+    <div class="cell spacer is-expanded" id="cell9"></div>
   </div>
 
 <script>
 /* ===================== Config ===================== */
 const urlParams = new URLSearchParams(window.location.search);
-const DATA_ENDPOINT = urlParams.get("data_endpoint") || "data/wxpn_885_annotated.json";
+const DATA_ENDPOINT = urlParams.get("data_endpoint") || "data/wxpn_885.json";
 
 /* Option D thresholds */
 const MIN_COUNT_ORIG_ARTIST = 2;
@@ -496,183 +352,14 @@ const currentAlbumArt  = document.getElementById("current-album-art");
 const currentSongTitle = document.getElementById("current-song-title");
 const currentSongArtist= document.getElementById("current-song-artist");
 const currentSongMeta  = document.getElementById("current-song-meta");
-const recentSongsBody = document.getElementById("recent-songs-body");
-var rankToRow = {};
-var rankToFrameIndex = {};
-/* ===================== Player (detachable, on-demand) ===================== */
-/*
-  Goal:
-  - Do NOT create/refresh provider iframes on every slider/state change (causes 429s).
-  - Only create the embed iframe when the user explicitly clicks Play.
-  - Reuse your existing album art; player has no extra art.
-*/
-(function () {
-  if (window.Race2Player) return;
 
-  var state = {
-    detached: false,
-    lastSong: null,
-    playingKey: null // e.g. "spotify:3Kgz..."
-  };
-
-  function pickProvider(media) {
-    if (!media) return null;
-
-    // Prefer Bandcamp support if you manually add it later; still user-initiated.
-    var bc = media.bandcamp;
-    if (bc && (bc.status === "manual" || bc.status === "found") && bc.embed_src) {
-      return { key: "bandcamp", embed_src: bc.embed_src, height: 120, url: bc.url };
-    }
-
-    var sp = media.spotify;
-    if (sp && sp.status === "found" && sp.embed_src) {
-      return { key: "spotify", embed_src: sp.embed_src, height: 152, url: sp.url };
-    }
-
-    var dz = media.deezer;
-    if (dz && dz.status === "found" && dz.embed_src) {
-      return { key: "deezer", embed_src: dz.embed_src, height: 200, url: dz.url };
-    }
-
-    return null;
-  }
-
-  function setFloatingTitle(row) {
-    var el = document.getElementById("floating-title");
-    if (!el) return;
-    var t = row && row.song ? cleanLabelText(row.song) : "";
-    var a = row && row.artist ? cleanLabelText(row.artist) : "";
-    el.textContent = (t && a) ? (t + " — " + a) : "Now Playing";
-  }
-
-  function renderLinks(linksEl, row) {
-    if (!linksEl) return;
-    var m = (row && row.media) ? row.media : {};
-    var links = [];
-    if (m.spotify && m.spotify.url) links.push('<a href="' + m.spotify.url + '">Open in Spotify</a>');
-    if (m.deezer  && m.deezer.url)  links.push('<a href="' + m.deezer.url  + '">Open in Deezer</a>');
-    if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + m.bandcamp.url + '">Support on Bandcamp</a>');
-    linksEl.innerHTML = links.join("");
-  }
-
-  function clearEmbed(embedEl) {
-    if (embedEl) embedEl.innerHTML = "";
-  }
-
-  function ensurePlayButtonState() {
-    var btn = document.getElementById("player-play-btn");
-    if (!btn) return;
-    btn.textContent = state.playingKey ? "Playing" : "Play";
-  }
-
-  function playInto(embedEl, row) {
-    if (!embedEl) return;
-
-    var provider = pickProvider(row && row.media ? row.media : null);
-    if (!provider || !provider.embed_src) {
-      embedEl.innerHTML = '<div class="song-meta" style="margin-top:10px;color:#aaa;">No embedded player available.</div>';
-      state.playingKey = null;
-      ensurePlayButtonState();
-      return;
-    }
-
-    var key = provider.key + ":" + provider.embed_src;
-    if (state.playingKey === key && embedEl.querySelector("iframe")) {
-      // Already playing this provider embed; don’t recreate.
-      return;
-    }
-
-    state.playingKey = key;
-    ensurePlayButtonState();
-
-    embedEl.innerHTML =
-      '<iframe loading="lazy"' +
-      ' src="' + provider.embed_src + '"' +
-      ' style="width:100%;height:' + provider.height + 'px;border:0;border-radius:10px;margin-top:10px"' +
-      ' allow="autoplay; encrypted-media; fullscreen; picture-in-picture"' +
-      ' referrerpolicy="no-referrer"></iframe>';
-  }
-
-  function update(row) {
-    state.lastSong = row;
-
-    var attachedEmbed = document.getElementById("current-player-embed");
-    var attachedLinks = document.getElementById("current-player-links");
-
-    var floating = document.getElementById("floating-player");
-    var floatingEmbed = document.getElementById("floating-player-embed");
-    var floatingLinks = document.getElementById("floating-player-links");
-
-    // Always update links (cheap; no provider calls)
-    renderLinks(attachedLinks, row);
-    renderLinks(floatingLinks, row);
-
-    // Do NOT auto-load embeds on update. Clear embeds unless already playing.
-    if (!state.playingKey) {
-      clearEmbed(attachedEmbed);
-      clearEmbed(floatingEmbed);
-      ensurePlayButtonState();
-    }
-
-    if (state.detached) {
-      if (floating) floating.classList.remove("hidden");
-      setFloatingTitle(row);
-      // When detached, keep attached embed empty
-      clearEmbed(attachedEmbed);
-    } else {
-      if (floating) floating.classList.add("hidden");
-      // When attached, keep floating embed empty
-      clearEmbed(floatingEmbed);
-    }
-  }
-
-  function detach() {
-    state.detached = true;
-    if (state.lastSong) update(state.lastSong);
-  }
-
-  function reattach() {
-    state.detached = false;
-    if (state.lastSong) update(state.lastSong);
-  }
-
-  function play() {
-    if (!state.lastSong) return;
-
-    // The attached cell is intentionally compact; embeds can be clipped there.
-    // To keep the player accessible and avoid extra scrollbars, always play in the floating panel.
-    if (!state.detached) state.detached = true;
-
-    var floating = document.getElementById("floating-player");
-    var floatingEmbed = document.getElementById("floating-player-embed");
-    var floatingLinks = document.getElementById("floating-player-links");
-
-    if (floating) floating.classList.remove("hidden");
-    setFloatingTitle(state.lastSong);
-
-    // Ensure links are present in the floating panel
-    renderLinks(floatingLinks, state.lastSong);
-
-    playInto(floatingEmbed, state.lastSong);
-  }
-
-  window.Race2Player = { update: update, detach: detach, reattach: reattach, play: play };
-}());
-
-document.addEventListener("click", function (e) {
-  if (!e || !e.target) return;
-
-  if (e.target.id === "player-detach-btn") {
-    if (window.Race2Player && typeof window.Race2Player.detach === "function") window.Race2Player.detach();
-  }
-  if (e.target.id === "player-reattach-btn") {
-    if (window.Race2Player && typeof window.Race2Player.reattach === "function") window.Race2Player.reattach();
-  }
-  if (e.target.id === "player-play-btn") {
-    if (window.Race2Player && typeof window.Race2Player.play === "function") window.Race2Player.play();
-  }
-});
-
+/* State */
+let sortedSongs = [];
+let frameRanks = [];
+let metrics = [];
+let metricState = {};
+let currentFrameIndex = 0;
+let initialized = false;
 
 /* ===================== Helpers ===================== */
 function truncateLabel(label, maxLen) {
@@ -686,60 +373,6 @@ function truncateLabel(label, maxLen) {
 function cleanLabelText(s) {
   return String(s || "").replace(/\\'/g, "'");
 }
-
-function renderUpcomingFromCurrent(currentRank) {
-  if (!recentSongsBody) return;
-
-  // Spec:
-  // - When currentRank is 885 (end), show nothing.
-  // - When currentRank is 1, show 1..10.
-  // - Always sort/display ascending starting from currentRank.
-  var rows = [];
-  var cr = Number(currentRank || 0);
-  if (!cr || isNaN(cr)) { recentSongsBody.innerHTML = ""; return; }
-  if (cr >= 885) { recentSongsBody.innerHTML = ""; return; }
-
-  var start = cr;
-  var end = Math.min(885, cr + 9);
-
-  for (var r = start; r <= end; r++) {
-    if (r === 885) { /* allowed, but if cr==885 we already returned */ }
-    var row = rankToRow[r];
-    if (row) rows.push(row);
-  }
-
-  var htmlRows = [];
-  for (var i=0; i<rows.length; i++) {
-    var rr = rows[i];
-    var rank = (rr.rank != null) ? String(rr.rank) : "";
-    var song = rr.song ? cleanLabelText(rr.song) : "";
-    var artist = rr.artist ? cleanLabelText(rr.artist) : "";
-    var orig = rr.originalArtist ? cleanLabelText(rr.originalArtist) : "";
-    htmlRows.push("<tr data-rank=\"" + rank + "\"><td>" + rank + "</td><td>" + song + "</td><td>" + artist + "</td><td>" + orig + "</td></tr>");
-  }
-  recentSongsBody.innerHTML = htmlRows.join("");
-}
-
-function pushRecent(row) {
-  if (!row) return;
-  // Key by id if present, else rank+song
-  var key = (row.id != null) ? String(row.id) : (String(row.rank || "") + "|" + String(row.song || ""));
-  // Remove existing
-  for (var i=0; i<recentHistory.length; i++) {
-    var k = (recentHistory[i].id != null) ? String(recentHistory[i].id) : (String(recentHistory[i].rank || "") + "|" + String(recentHistory[i].song || ""));
-    if (k === key) { recentHistory.splice(i,1); break; }
-  }
-  recentHistory.push({
-    id: row.id,
-    rank: row.rank,
-    song: row.song,
-    artist: row.artist,
-    originalArtist: row.originalArtist
-  });
-  while (recentHistory.length > 15) recentHistory.shift();
-  renderRecentSongs();
-}
-
 
 /* Extract first 4-digit year anywhere */
 function parseYearFromString(value) {
@@ -1104,7 +737,12 @@ async function init() {
   initKeyboardStepping();
   initSwipeStepping();
   initResizeHandler();
-try {
+
+  // spacer for 3x3 screenshots
+  const spacer = document.getElementById("cell9");
+  if (spacer) spacer.classList.add("spacer", "is-expanded");
+
+  try {
     const resp = await fetch(DATA_ENDPOINT);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
@@ -1140,9 +778,6 @@ try {
     // ranks descending: 885 -> 1
     sortedSongs = filtered.slice().sort((a,b) => d3.descending(a.rank, b.rank));
     frameRanks = sortedSongs.map(r => r.rank);
-    rankToRow = {};
-    rankToFrameIndex = {};
-    sortedSongs.forEach(function(r,i){ if (r && r.rank != null) { var rk = Number(r.rank); rankToRow[rk] = r; rankToFrameIndex[rk] = i; } });
 
     metrics = [
       {
@@ -1240,21 +875,6 @@ try {
       updateDashboard(idx);
     });
 
-    // Clickable rows in Next 10 Songs: jump to that rank
-    if (recentSongsBody) {
-      recentSongsBody.addEventListener("click", function(ev) {
-        var tr = ev.target && ev.target.closest ? ev.target.closest("tr") : null;
-        if (!tr) return;
-        var r = Number(tr.getAttribute("data-rank") || 0);
-        if (!r || isNaN(r)) return;
-        var idx2 = (rankToFrameIndex && (r in rankToFrameIndex)) ? rankToFrameIndex[r] : null;
-        if (idx2 === null || idx2 === undefined) return;
-        frameSlider.value = String(idx2);
-        updateDashboard(idx2);
-      });
-    }
-
-
     initialized = true;
     updateDashboard(0);
 
@@ -1313,13 +933,6 @@ function updateDashboard(frameIndex) {
   currentSongTitle.textContent = title;
   currentSongArtist.textContent = `${artist} (covering ${origArtist})`;
   currentSongMeta.textContent = `Rank ${row.rank} · Original year: ${origYear} · Cover year: ${coverYear}`;
-
-  // Last 15 cell: show upcoming window starting at current rank (ascending)
-  renderUpcomingFromCurrent(row.rank);
-
-  // Player: update UI only (no provider calls until Play)
-  if (window.Race2Player && typeof window.Race2Player.update === "function") window.Race2Player.update(row);
-
 }
 
 /* Boot */
