@@ -251,6 +251,8 @@
       border-radius: 10px;
       margin-top: 8px;
       height: 120px;
+      border: 1px solid rgba(255,255,255,.28);
+      background: #0f0f0f;
     }
     .player-embed .play-btn {
       margin-top: 8px;
@@ -377,6 +379,12 @@
         max-height: 60vh;
       }
     }
+
+  
+      
+    /* Phone layout override (JS adds .is-phone and .is-landscape) */
+    body.is-phone:not(.is-landscape) #dashboard { grid-template-columns: 1fr !important; }
+    body.is-phone.is-landscape #dashboard { grid-template-columns: repeat(2, 1fr) !important; }
 
   </style>
 </head>
@@ -1348,6 +1356,26 @@ function applyMobileDefaults() {
   }
 }
 window.addEventListener("load", applyMobileDefaults);
+
+/* ===================== Device class (phone vs tablet) ===================== */
+function applyResponsiveDeviceClass() {
+  var w = window.innerWidth || 9999;
+  var h = window.innerHeight || 9999;
+  var minSide = Math.min(w, h);
+  var body = document.body;
+  if (!body) return;
+
+  // Treat as phone if the smaller side is < 520px
+  var isPhone = (minSide < 520);
+  body.classList.toggle("is-phone", isPhone);
+
+  // Landscape if width > height
+  var isLandscape = (w > h);
+  body.classList.toggle("is-landscape", isLandscape);
+}
+window.addEventListener("load", applyResponsiveDeviceClass);
+window.addEventListener("resize", applyResponsiveDeviceClass);
+
 
 </script>
 </body>
