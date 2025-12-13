@@ -329,6 +329,42 @@
     .recent-table tbody tr:hover { background: rgba(255,255,255,0.04); }
     .recent-table td:nth-child(1) { width: 54px; opacity: 0.9; }
 
+  
+    .player-unavailable{
+      font-size: 11px;
+      color: #bdbdbd;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px dashed rgba(255,255,255,.25);
+      background: rgba(255,255,255,.04);
+      white-space: nowrap;
+    }
+
+    /* iPad / responsive grid presets */
+    @media (max-width: 1024px) and (orientation: landscape) {
+      .grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(210px, auto); }
+    }
+    @media (max-width: 1024px) and (orientation: portrait) {
+      .grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(210px, auto); }
+    }
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
+      .floating-player{
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: auto;
+        max-height: 60vh;
+      }
+    }
+
+    /* Next 10 Songs (cell9) tweaks */
+    #cell9 .cell-body { padding-left: 14px; padding-right: 14px; }
+    #cell9 .cell-header { padding-left: 14px; padding-right: 14px; }
+    #cell9 table { font-size: 12px; }
+    #cell9 th { font-size: 11px; opacity: 0.9; }
+    #cell9 td { padding-top: 6px; padding-bottom: 6px; }
+
   </style>
 </head>
 
@@ -347,14 +383,6 @@
 
   <div id="dashboard">
     <!-- Row 1 -->
-    <div class="cell draggable-cell is-expanded" id="cell1">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Artists</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-artists"></svg></div>
-    </div>
-
     <div class="cell draggable-cell is-expanded" id="cell2">
       <div class="cell-header">
         <span class="cell-title">Current Song</span>
@@ -368,66 +396,15 @@
           <div class="song-meta" id="current-song-meta"></div>
 
           <div id="current-player-actions" class="player-actions">
-            <button id="player-play-btn" type="button">Play</button>
-            <button id="player-detach-btn" type="button">Detach</button>
-          </div>
+  <button id="player-play-btn" type="button">Play</button>
+  <span id="player-unavailable-msg" class="player-unavailable hidden"></span>
+</div>
           <div id="current-player-embed" class="player-embed"></div>
           <div id="current-player-links" class="player-links"></div>
         </div>
       </div>
     </div>
-
-    <div class="cell draggable-cell is-expanded" id="cell3">
-      <div class="cell-header">
-        <span class="cell-title">Most Represented Genres</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-genres"></svg></div>
-    </div>
-
-    <!-- Row 2 -->
-    <div class="cell draggable-cell is-expanded" id="cell4">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Songs</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-songs"></svg></div>
-    </div>
-
-    <div class="cell draggable-cell is-expanded" id="cell5">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Decades</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-decades"></svg></div>
-    </div>
-
-    <div class="cell draggable-cell is-expanded" id="cell6">
-      <div class="cell-header">
-        <span class="cell-title">Most Frequent Cover Artists</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-cover-artists"></svg></div>
-    </div>
-
-    <!-- Row 3 -->
-    <div class="cell draggable-cell is-expanded" id="cell7">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Years</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-years"></svg></div>
-    </div>
-
-    <div class="cell draggable-cell is-expanded" id="cell8">
-      <div class="cell-header">
-        <span class="cell-title">Most Frequent Cover Years</span>
-        <button class="cell-toggle" type="button">Hide</button>
-      </div>
-      <div class="cell-body"><svg class="chart" id="chart-cover-years"></svg></div>
-    </div>
-
-    <div class="cell draggable-cell is-expanded" id="cell9">
+<div class="cell draggable-cell is-expanded" id="cell9">
       <div class="cell-header">
         <span class="cell-title">Next 10 Songs</span>
         <button class="cell-toggle" type="button">Hide</button>
@@ -441,6 +418,55 @@
         </div>
       </div>
     </div>
+<div class="cell draggable-cell is-expanded" id="cell1">
+      <div class="cell-header">
+        <span class="cell-title">Most Covered Original Artists</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-orig-artists"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell3">
+      <div class="cell-header">
+        <span class="cell-title">Most Represented Genres</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-genres"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell4">
+      <div class="cell-header">
+        <span class="cell-title">Most Covered Original Songs</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-orig-songs"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell5">
+      <div class="cell-header">
+        <span class="cell-title">Most Covered Original Decades</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-orig-decades"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell6">
+      <div class="cell-header">
+        <span class="cell-title">Most Frequent Cover Artists</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-cover-artists"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell7">
+      <div class="cell-header">
+        <span class="cell-title">Most Covered Original Years</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-orig-years"></svg></div>
+    </div>
+<div class="cell draggable-cell is-expanded" id="cell8">
+      <div class="cell-header">
+        <span class="cell-title">Most Frequent Cover Years</span>
+        <button class="cell-toggle" type="button">Hide</button>
+      </div>
+      <div class="cell-body"><svg class="chart" id="chart-cover-years"></svg></div>
+    </div>
   </div>
 
 
@@ -448,7 +474,7 @@
   <div id="floating-player" class="floating-player hidden" aria-live="polite">
     <div class="floating-bar">
       <div class="floating-title" id="floating-title">Now Playing</div>
-      <button id="player-reattach-btn" type="button">Reattach</button>
+      <button id="player-close-btn" type="button">Close</button>
     </div>
     <div style="padding:10px;">
       <div id="floating-player-embed" class="player-embed"></div>
@@ -499,39 +525,28 @@ const currentSongMeta  = document.getElementById("current-song-meta");
 const recentSongsBody = document.getElementById("recent-songs-body");
 var rankToRow = {};
 var rankToFrameIndex = {};
-/* ===================== Player (detachable, on-demand) ===================== */
-/*
-  Goal:
-  - Do NOT create/refresh provider iframes on every slider/state change (causes 429s).
-  - Only create the embed iframe when the user explicitly clicks Play.
-  - Reuse your existing album art; player has no extra art.
-*/
+/* ===================== Player (on-demand, floating) ===================== */
 (function () {
   if (window.Race2Player) return;
 
-  var state = {
-    detached: false,
-    lastSong: null,
-    playingKey: null // e.g. "spotify:3Kgz..."
-  };
+  var state = { open: false, lastSong: null };
 
   function pickProvider(media) {
     if (!media) return null;
 
-    // Prefer Bandcamp support if you manually add it later; still user-initiated.
     var bc = media.bandcamp;
     if (bc && (bc.status === "manual" || bc.status === "found") && bc.embed_src) {
-      return { key: "bandcamp", embed_src: bc.embed_src, height: 120, url: bc.url };
+      return { key: "bandcamp", embed_src: bc.embed_src, height: 120 };
     }
 
     var sp = media.spotify;
     if (sp && sp.status === "found" && sp.embed_src) {
-      return { key: "spotify", embed_src: sp.embed_src, height: 152, url: sp.url };
+      return { key: "spotify", embed_src: sp.embed_src, height: 152 };
     }
 
     var dz = media.deezer;
     if (dz && dz.status === "found" && dz.embed_src) {
-      return { key: "deezer", embed_src: dz.embed_src, height: 200, url: dz.url };
+      return { key: "deezer", embed_src: dz.embed_src, height: 200 };
     }
 
     return null;
@@ -540,136 +555,104 @@ var rankToFrameIndex = {};
   function setFloatingTitle(row) {
     var el = document.getElementById("floating-title");
     if (!el) return;
-    var t = row && row.song ? cleanLabelText(row.song) : "";
-    var a = row && row.artist ? cleanLabelText(row.artist) : "";
+    var t = cleanLabelText((row && row.song) || "");
+    var a = cleanLabelText((row && row.artist) || "");
     el.textContent = (t && a) ? (t + " — " + a) : "Now Playing";
   }
 
-  function renderLinks(linksEl, row) {
-    if (!linksEl) return;
+  function setAttachedAvailability(row) {
+    var playBtn = document.getElementById("player-play-btn");
+    var msg = document.getElementById("player-unavailable-msg");
+    if (!playBtn || !msg) return;
+
+    var provider = pickProvider(row && row.media);
+    if (provider && provider.embed_src) {
+      playBtn.classList.remove("hidden");
+      playBtn.disabled = false;
+      playBtn.textContent = "Play";
+      msg.classList.add("hidden");
+      msg.textContent = "";
+    } else {
+      playBtn.classList.add("hidden");
+      msg.classList.remove("hidden");
+      msg.textContent = "No preview available";
+    }
+  }
+
+  function renderFloating(row) {
+    var embedEl = document.getElementById("floating-player-embed");
+    var linksEl = document.getElementById("floating-player-links");
+    if (!embedEl || !linksEl) return;
+
+    var provider = pickProvider(row && row.media);
+    if (provider && provider.embed_src) {
+      embedEl.innerHTML =
+        '<iframe loading="lazy"' +
+        ' src="' + provider.embed_src + '"' +
+        ' style="width:100%;height:' + provider.height + 'px;border:0;border-radius:10px;margin-top:10px"' +
+        ' allow="autoplay; encrypted-media; fullscreen; picture-in-picture"' +
+        ' referrerpolicy="no-referrer"></iframe>';
+    } else {
+      embedEl.innerHTML = '<div class="song-meta" style="margin-top:10px;color:#aaa;">No embedded player available.</div>';
+    }
+
     var m = (row && row.media) ? row.media : {};
     var links = [];
-    if (m.spotify && m.spotify.url) links.push('<a href="' + m.spotify.url + '">Open in Spotify</a>');
-    if (m.deezer  && m.deezer.url)  links.push('<a href="' + m.deezer.url  + '">Open in Deezer</a>');
+    if (m.spotify && m.spotify.url)  links.push('<a href="' + m.spotify.url + '">Open in Spotify</a>');
+    if (m.deezer  && m.deezer.url)   links.push('<a href="' + m.deezer.url + '">Open in Deezer</a>');
     if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + m.bandcamp.url + '">Support on Bandcamp</a>');
     linksEl.innerHTML = links.join("");
   }
 
-  function clearEmbed(embedEl) {
+  function open(row) {
+    var floating = document.getElementById("floating-player");
+    if (!floating) return;
+    state.open = true;
+    floating.classList.remove("hidden");
+    setFloatingTitle(row);
+    renderFloating(row);
+  }
+
+  function close() {
+    var floating = document.getElementById("floating-player");
+    if (!floating) return;
+    state.open = false;
+    floating.classList.add("hidden");
+    var embedEl = document.getElementById("floating-player-embed");
     if (embedEl) embedEl.innerHTML = "";
   }
 
-  function ensurePlayButtonState() {
-    var btn = document.getElementById("player-play-btn");
-    if (!btn) return;
-    btn.textContent = state.playingKey ? "Playing" : "Play";
-  }
-
-  function playInto(embedEl, row) {
-    if (!embedEl) return;
-
-    var provider = pickProvider(row && row.media ? row.media : null);
-    if (!provider || !provider.embed_src) {
-      embedEl.innerHTML = '<div class="song-meta" style="margin-top:10px;color:#aaa;">No embedded player available.</div>';
-      state.playingKey = null;
-      ensurePlayButtonState();
-      return;
-    }
-
-    var key = provider.key + ":" + provider.embed_src;
-    if (state.playingKey === key && embedEl.querySelector("iframe")) {
-      // Already playing this provider embed; don’t recreate.
-      return;
-    }
-
-    state.playingKey = key;
-    ensurePlayButtonState();
-
-    embedEl.innerHTML =
-      '<iframe loading="lazy"' +
-      ' src="' + provider.embed_src + '"' +
-      ' style="width:100%;height:' + provider.height + 'px;border:0;border-radius:10px;margin-top:10px"' +
-      ' allow="autoplay; encrypted-media; fullscreen; picture-in-picture"' +
-      ' referrerpolicy="no-referrer"></iframe>';
+  function play() {
+    var row = state.lastSong;
+    var provider = pickProvider(row && row.media);
+    if (!provider || !provider.embed_src) return;
+    open(row);
+    var playBtn = document.getElementById("player-play-btn");
+    if (playBtn) playBtn.textContent = "Playing";
   }
 
   function update(row) {
     state.lastSong = row;
-
-    var attachedEmbed = document.getElementById("current-player-embed");
-    var attachedLinks = document.getElementById("current-player-links");
-
-    var floating = document.getElementById("floating-player");
-    var floatingEmbed = document.getElementById("floating-player-embed");
-    var floatingLinks = document.getElementById("floating-player-links");
-
-    // Always update links (cheap; no provider calls)
-    renderLinks(attachedLinks, row);
-    renderLinks(floatingLinks, row);
-
-    // Do NOT auto-load embeds on update. Clear embeds unless already playing.
-    if (!state.playingKey) {
-      clearEmbed(attachedEmbed);
-      clearEmbed(floatingEmbed);
-      ensurePlayButtonState();
-    }
-
-    if (state.detached) {
-      if (floating) floating.classList.remove("hidden");
+    setAttachedAvailability(row);
+    if (state.open) {
       setFloatingTitle(row);
-      // When detached, keep attached embed empty
-      clearEmbed(attachedEmbed);
-    } else {
-      if (floating) floating.classList.add("hidden");
-      // When attached, keep floating embed empty
-      clearEmbed(floatingEmbed);
+      renderFloating(row);
     }
   }
 
-  function detach() {
-    state.detached = true;
-    if (state.lastSong) update(state.lastSong);
-  }
+  window.Race2Player = { update: update, play: play, close: close };
+})();
 
-  function reattach() {
-    state.detached = false;
-    if (state.lastSong) update(state.lastSong);
-  }
-
-  function play() {
-    if (!state.lastSong) return;
-
-    // The attached cell is intentionally compact; embeds can be clipped there.
-    // To keep the player accessible and avoid extra scrollbars, always play in the floating panel.
-    if (!state.detached) state.detached = true;
-
-    var floating = document.getElementById("floating-player");
-    var floatingEmbed = document.getElementById("floating-player-embed");
-    var floatingLinks = document.getElementById("floating-player-links");
-
-    if (floating) floating.classList.remove("hidden");
-    setFloatingTitle(state.lastSong);
-
-    // Ensure links are present in the floating panel
-    renderLinks(floatingLinks, state.lastSong);
-
-    playInto(floatingEmbed, state.lastSong);
-  }
-
-  window.Race2Player = { update: update, detach: detach, reattach: reattach, play: play };
-}());
-
-document.addEventListener("click", function (e) {
+/* Wire player buttons (Safari compatible) */
+document.addEventListener("click", function(e){
   if (!e || !e.target) return;
-
-  if (e.target.id === "player-detach-btn") {
-    if (window.Race2Player && typeof window.Race2Player.detach === "function") window.Race2Player.detach();
-  }
-  if (e.target.id === "player-reattach-btn") {
-    if (window.Race2Player && typeof window.Race2Player.reattach === "function") window.Race2Player.reattach();
-  }
   if (e.target.id === "player-play-btn") {
     if (window.Race2Player && typeof window.Race2Player.play === "function") window.Race2Player.play();
+  }
+  if (e.target.id === "player-close-btn") {
+    if (window.Race2Player && typeof window.Race2Player.close === "function") window.Race2Player.close();
+    var playBtn = document.getElementById("player-play-btn");
+    if (playBtn) playBtn.textContent = "Play";
   }
 });
 
@@ -1324,6 +1307,35 @@ function updateDashboard(frameIndex) {
 
 /* Boot */
 init();
+</script>
+<script>
+
+/* ===================== Mobile defaults ===================== */
+function applyMobileDefaults() {
+  var w = window.innerWidth || 9999;
+  if (w > 650) return;
+
+  // Show only Current Song (cell2) and Next 10 Songs (cell9) by default
+  var show = {"cell2": true, "cell9": true};
+  var cells = document.querySelectorAll(".cell");
+  for (var i=0; i<cells.length; i++) {
+    var cell = cells[i];
+    if (!cell || !cell.id) continue;
+    var body = cell.querySelector(".cell-body");
+    var btn = cell.querySelector(".cell-toggle");
+    if (!body) continue;
+
+    if (show[cell.id]) {
+      body.classList.remove("is-hidden");
+      if (btn) btn.textContent = "Hide";
+    } else {
+      body.classList.add("is-hidden");
+      if (btn) btn.textContent = "Show";
+    }
+  }
+}
+window.addEventListener("load", applyMobileDefaults);
+
 </script>
 </body>
 </html>
