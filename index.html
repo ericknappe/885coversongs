@@ -444,6 +444,47 @@
   color: #ddd;
 }
 
+
+/* --- iPhone/Small-screen control bar + overflow fixes --- */
+html, body { overflow-x: hidden; }
+
+#controls { max-width: 100%; }
+
+#controls-inner{
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.about-btn{
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #444;
+  background: #262626;
+  color: #eee;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.about-details{
+  width: min(720px, calc(100% - 16px));
+}
+
+/* On phone portrait, stack controls to avoid widening the viewport (prevents 2-col scaling) */
+@media (max-width: 520px) and (orientation: portrait) {
+  #controls-inner{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #controls-inner > *{
+    width: 100%;
+  }
+  #controls-inner label{
+    width: auto;
+  }
+  .panel-jump{ max-width: 100%; }
+  .about-btn{ width: 100%; }
+}
+
 </style>
 </head>
 
@@ -456,7 +497,12 @@
     <div id="controls-inner">
       <label for="frameSlider">Song number:</label>
       <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
-      <div id="frameLabel">0</div>
+      
+      <div class="control-row">
+        <label for="panel-jump">Panel:</label>
+        <select id="panel-jump" class="panel-jump"><option value="">Jump to panel…</option></select>
+      </div>
+<div id="frameLabel">0</div>
 
   <details id="about-details" class="about-details">
     <summary>About</summary>
@@ -472,12 +518,7 @@
       </ul>
     </div>
   </details>
-
-
-      <label for="panel-jump" style="margin-left:10px;">Panel:</label>
-      <select id="panel-jump" class="panel-jump"><option value="">Jump to panel…</option></select>
-
-    </div>
+</div>
   </div>
 
   <div id="dashboard">
@@ -1492,6 +1533,23 @@ window.addEventListener("resize", applyResponsiveDeviceClass);
     window.scrollTo({ top: y, behavior: "smooth" });
 
     sel.value = "";
+  });
+})();
+
+
+// ----------------------------- About toggle (no modals) -----------------------------
+(function initAboutDetailsToggle(){
+  const btn = document.getElementById("about-btn");
+  const details = document.getElementById("about-details");
+  if (!btn || !details) return;
+
+  btn.addEventListener("click", () => {
+    details.open = !details.open;
+    // If opening, scroll just enough to reveal it
+    if (details.open) {
+      const y = details.getBoundingClientRect().top + window.scrollY - 8;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
   });
 })();
 
