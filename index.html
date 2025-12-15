@@ -410,69 +410,6 @@
   #cell9 .cell-body { max-height: 240px; overflow-y: auto; padding-left: 10px; padding-right: 10px; }
 }
 
-
-.about-details{
-  margin: 6px auto 0;
-  max-width: 720px;
-  background: #181818;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 6px 10px;
-}
-
-.about-details summary{
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.about-body{
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 1.35;
-  color: #ddd;
-}
-
-
-/* --- iPhone/Small-screen control bar + overflow fixes --- */
-html, body { overflow-x: hidden; }
-
-#controls { max-width: 100%; }
-
-#controls-inner{
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.about-btn{
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid #444;
-  background: #262626;
-  color: #eee;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.about-details{
-  width: min(720px, calc(100% - 16px));
-}
-
-/* On phone portrait, stack controls to avoid widening the viewport (prevents 2-col scaling) */
-@media (max-width: 520px) and (orientation: portrait) {
-  #controls-inner{
-    flex-direction: column;
-    align-items: stretch;
-  }
-  #controls-inner > *{
-    width: 100%;
-  }
-  #controls-inner label{
-    width: auto;
-  }
-  .about-btn{ width: 100%; }
-}
-
 </style>
 </head>
 
@@ -485,23 +422,8 @@ html, body { overflow-x: hidden; }
     <div id="controls-inner">
       <label for="frameSlider">Song number:</label>
       <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
-<div id="frameLabel">0</div>
-
-  <details id="about-details" class="about-details">
-    <summary>About</summary>
-    <div class="about-body">
-      <p>
-        This is a standalone, one-page dashboard for WXPN’s <strong>885 Greatest Cover Songs</strong> countdown.
-      </p>
-      <ul>
-        <li>Runs entirely in the browser (GitHub Pages)</li>
-        <li>Audio uses embedded previews when available</li>
-        <li>Use “Jump to panel…” on phones to navigate quickly</li>
-        <li>Detach the player to keep listening while scrolling</li>
-      </ul>
+      <div id="frameLabel">0</div>
     </div>
-  </details>
-</div>
   </div>
 
   <div id="dashboard">
@@ -1480,23 +1402,6 @@ function applyResponsiveDeviceClass() {
 window.addEventListener("load", applyResponsiveDeviceClass);
 window.addEventListener("resize", applyResponsiveDeviceClass);
 
-
-
-// ----------------------------- About toggle (no modals) -----------------------------
-(function initAboutDetailsToggle(){
-  const btn = document.getElementById("about-btn");
-  const details = document.getElementById("about-details");
-  if (!btn || !details) return;
-
-  btn.addEventListener("click", () => {
-    details.open = !details.open;
-    // If opening, scroll just enough to reveal it
-    if (details.open) {
-      const y = details.getBoundingClientRect().top + window.scrollY - 8;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  });
-})();
 
 </script>
 </body>
