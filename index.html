@@ -4,106 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WXPN 885 Greatest Cover Songs – Countdown Dashboard</title>
-  <script src="https://d3js.org/d3.v7.min.js">
-// ----------------------------- Phone-friendly jump menu + About -----------------------------
-(function initFabAndModals(){
-  const dashboard = document.getElementById("dashboard");
-  const modalPanel = document.getElementById("panel-picker-modal");
-  const modalAbout = document.getElementById("about-modal");
-  const list = document.getElementById("panel-picker-list");
-
-  function openModal(el){
-    if (!el) return;
-    el.hidden = false;
-    document.body.classList.add("modal-open");
-  }
-  function closeModal(el){
-    if (!el) return;
-    el.hidden = true;
-    document.body.classList.remove("modal-open");
-  }
-
-  // Click backdrop to close
-  [modalPanel, modalAbout].forEach(m => {
-    if (!m) return;
-    m.addEventListener("click", (e) => {
-      if (e.target === m) closeModal(m);
-    });
-  });
-
-  // Close buttons
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest && e.target.closest("[data-modal-close]");
-    if (!btn) return;
-    const id = btn.getAttribute("data-modal-close");
-    closeModal(document.getElementById(id));
-  });
-
-  // ESC closes
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeModal(modalPanel);
-      closeModal(modalAbout);
-    }
-  });
-
-  // Build panel list from visible cells
-  function buildPanelList(){
-    if (!dashboard || !list) return;
-    list.innerHTML = "";
-    const cells = Array.from(dashboard.querySelectorAll(".cell"));
-    cells.forEach(cell => {
-      const titleEl = cell.querySelector(".cell-title");
-      const title = titleEl ? titleEl.textContent.trim() : (cell.id || "Panel");
-      // Skip if no id
-      if (!cell.id) return;
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "panel-picker-btn";
-      btn.innerHTML = `<span>${escapeHtml(title)}</span><span class="pp-sub">Jump</span>`;
-      btn.addEventListener("click", () => {
-        // Expand the panel if it's collapsed
-        cell.classList.remove("is-collapsed");
-        // If your code toggles via button text, keep it in sync where possible
-        const toggle = cell.querySelector(".cell-toggle");
-        if (toggle) toggle.textContent = "Hide";
-        closeModal(modalPanel);
-
-        // Scroll with a bit of top padding
-        const y = cell.getBoundingClientRect().top + window.scrollY - 12;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      });
-      list.appendChild(btn);
-    });
-  }
-
-  // Basic HTML escape for injected title text
-  function escapeHtml(s){
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  // FAB handlers
-  const fabPanels = document.getElementById("fab-panels");
-  const fabAbout = document.getElementById("fab-about");
-
-  if (fabPanels) {
-    fabPanels.addEventListener("click", () => {
-      buildPanelList();
-      openModal(modalPanel);
-    });
-  }
-  if (fabAbout) {
-    fabAbout.addEventListener("click", () => openModal(modalAbout));
-  }
-})();
-
-</script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     * { box-sizing: border-box; }
 
@@ -450,10 +351,10 @@
     #cell9 td { padding-top: 6px; padding-bottom: 6px; }
 
   
+    
     /* iPad / mobile responsive grid presets (target #dashboard) */
-    /* iPhone and small devices: 1 column */
+    /* Small devices (general): keep floating player usable */
     @media (max-width: 700px) {
-      #dashboard { grid-template-columns: repeat(2, 1fr); }
       .floating-player{
         left: 10px;
         right: 10px;
@@ -470,18 +371,9 @@
     @media (max-width: 1400px) and (orientation: landscape) {
       #dashboard { grid-template-columns: repeat(3, 1fr); }
     }
-      .floating-player{
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        width: auto;
-        max-height: 60vh;
-      }
-    }
 
-  
-      
     /* Phone layout override (JS adds .is-phone and .is-landscape) */
+/* Phone layout override (JS adds .is-phone and .is-landscape) */
     body.is-phone:not(.is-landscape) #dashboard { grid-template-columns: 1fr !important; }
     body.is-phone.is-landscape #dashboard { grid-template-columns: repeat(2, 1fr) !important; }
 
@@ -541,7 +433,7 @@
 
 /* Hide FAB on larger screens where the grid is easy to navigate */
 @media (min-width: 1100px) {
-  #fab-stack{ display: none; }
+  #fab-panels{ display: none; }
 }
 
 /* Modal */
@@ -555,6 +447,7 @@
   justify-content: center;
   padding: 14px;
 }
+.modal-overlay[hidden]{ display: none !important; }
 
 .modal-card{
   width: min(560px, 96vw);
@@ -672,6 +565,7 @@ body.modal-open{ overflow:hidden; }
       <label for="frameSlider">Song number:</label>
       <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
       <div id="frameLabel">0</div>
+      <button id="about-btn" class="cell-toggle" type="button" style="margin-left:auto;">About</button>
     </div>
   </div>
 
@@ -1657,8 +1551,7 @@ window.addEventListener("resize", applyResponsiveDeviceClass);
   <!-- Floating Controls (Phone-friendly) -->
   <div id="fab-stack" aria-label="Quick controls">
     <button id="fab-panels" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="panel-picker-modal" title="Panels">☰</button>
-    <button id="fab-about" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="about-modal" title="About">i</button>
-  </div>
+    </div>
 
   <!-- Panel Picker Modal -->
   <div id="panel-picker-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="panel-picker-title" hidden>
@@ -1710,6 +1603,114 @@ window.addEventListener("resize", applyResponsiveDeviceClass);
       </div>
     </div>
   </div>
+
+
+<script>
+// ----------------------------- Panels jump menu + About (safe init) -----------------------------
+(function(){
+  function ready(fn){
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+
+  ready(function initFabAndModals(){
+    const dashboard = document.getElementById("dashboard");
+    const modalPanel = document.getElementById("panel-picker-modal");
+    const modalAbout = document.getElementById("about-modal");
+    const list = document.getElementById("panel-picker-list");
+
+    function openModal(el){
+      if (!el) return;
+      el.hidden = false;
+      document.body.classList.add("modal-open");
+    }
+    function closeModal(el){
+      if (!el) return;
+      el.hidden = true;
+      const anyOpen = Array.from(document.querySelectorAll(".modal-overlay")).some(m => !m.hidden);
+      if (!anyOpen) document.body.classList.remove("modal-open");
+    }
+
+    // Backdrop closes
+    [modalPanel, modalAbout].forEach(m => {
+      if (!m) return;
+      m.addEventListener("click", (e) => { if (e.target === m) closeModal(m); });
+    });
+
+    // Close buttons via data attribute
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("[data-modal-close]") : null;
+      if (!btn) return;
+      const id = btn.getAttribute("data-modal-close");
+      const m = document.getElementById(id);
+      if (m) closeModal(m);
+    });
+
+    // ESC closes
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal(modalPanel);
+        closeModal(modalAbout);
+      }
+    });
+
+    // Build panel list
+    function escapeHtml(s){
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function buildPanelList(){
+      if (!dashboard || !list) return;
+      list.innerHTML = "";
+      const cells = Array.from(dashboard.querySelectorAll(".cell"));
+      cells.forEach(cell => {
+        if (!cell.id) return;
+        const titleEl = cell.querySelector(".cell-title");
+        const title = titleEl ? titleEl.textContent.trim() : cell.id;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "panel-picker-btn";
+        btn.innerHTML = `<span>${escapeHtml(title)}</span><span class="pp-sub">Jump</span>`;
+        btn.addEventListener("click", () => {
+          // Expand panel: use the existing toggle mechanism if present
+          const body = cell.querySelector(".cell-body");
+          const toggle = cell.querySelector(".cell-toggle");
+          if (body) body.style.display = "";
+          cell.classList.remove("is-collapsed");
+          cell.classList.add("is-expanded");
+          if (toggle) toggle.textContent = "Hide";
+
+          closeModal(modalPanel);
+          const y = cell.getBoundingClientRect().top + window.scrollY - 12;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        });
+        list.appendChild(btn);
+      });
+    }
+
+    // Panels button (FAB)
+    const fabPanels = document.getElementById("fab-panels");
+    if (fabPanels) {
+      fabPanels.addEventListener("click", () => {
+        buildPanelList();
+        openModal(modalPanel);
+      });
+    }
+
+    // About button (top bar)
+    const aboutBtn = document.getElementById("about-btn");
+    if (aboutBtn) {
+      aboutBtn.addEventListener("click", () => openModal(modalAbout));
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
