@@ -114,7 +114,7 @@
     }
 
     @media (max-width: 1200px) { #dashboard { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 800px)  { #dashboard { grid-template-columns: 1fr; } }
+    @media (max-width: 800px)  { #dashboard { grid-template-columns: repeat(2, 1fr); } }
 
     .cell {
       background: #181818;
@@ -354,7 +354,7 @@
     /* iPad / mobile responsive grid presets (target #dashboard) */
     /* iPhone and small devices: 1 column */
     @media (max-width: 700px) {
-      #dashboard { grid-template-columns: 1fr; }
+      #dashboard { grid-template-columns: repeat(2, 1fr); }
       .floating-player{
         left: 10px;
         right: 10px;
@@ -386,7 +386,31 @@
     body.is-phone:not(.is-landscape) #dashboard { grid-template-columns: 1fr !important; }
     body.is-phone.is-landscape #dashboard { grid-template-columns: repeat(2, 1fr) !important; }
 
-  </style>
+  
+    /* Backup: phone portrait should be 1 column even if JS class fails */
+    @media (max-width: 520px) and (orientation: portrait) {
+      #dashboard { grid-template-columns: 1fr !important; }
+    }
+
+  
+/* Phone portrait: 1 column (no JS dependency) */
+@media (max-width: 520px) and (orientation: portrait) {
+  #dashboard { grid-template-columns: 1fr; }
+}
+
+/* Phone landscape: 2 columns */
+@media (max-width: 900px) and (orientation: landscape) {
+  #dashboard { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tighten Next 10 Songs in 2x5 layouts */
+@media (min-width: 600px) and (max-width: 1200px) {
+  #cell9 .recent-table { font-size: 11px; }
+  #cell9 td { padding-top: 4px; padding-bottom: 4px; }
+  #cell9 .cell-body { max-height: 240px; overflow-y: auto; padding-left: 10px; padding-right: 10px; }
+}
+
+</style>
 </head>
 
 <body>
@@ -831,7 +855,9 @@ function setupChart(svgElement, topN, globalMax, allowedSet) {
   const height = svg.node().clientHeight || 240;
 
   let marginLeft;
-  if (width <= 500) marginLeft = 130;
+  if (width <= 360) marginLeft = 90;
+  else if (width <= 420) marginLeft = 105;
+  else if (width <= 500) marginLeft = 115;
   else if (width <= 900) marginLeft = 150;
   else marginLeft = 165;
 
@@ -1350,7 +1376,7 @@ function applyMobileDefaults() {
       body.classList.remove("is-hidden");
       if (btn) btn.textContent = "Hide";
     } else {
-      body.classList.add("is-hidden");
+      cell.classList.add("is-collapsed");
       if (btn) btn.textContent = "Show";
     }
   }
