@@ -351,10 +351,10 @@
     #cell9 td { padding-top: 6px; padding-bottom: 6px; }
 
   
-    
     /* iPad / mobile responsive grid presets (target #dashboard) */
-    /* Small devices (general): keep floating player usable */
+    /* iPhone and small devices: 1 column */
     @media (max-width: 700px) {
+      #dashboard { grid-template-columns: repeat(2, 1fr); }
       .floating-player{
         left: 10px;
         right: 10px;
@@ -371,9 +371,18 @@
     @media (max-width: 1400px) and (orientation: landscape) {
       #dashboard { grid-template-columns: repeat(3, 1fr); }
     }
+      .floating-player{
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: auto;
+        max-height: 60vh;
+      }
+    }
 
+  
+      
     /* Phone layout override (JS adds .is-phone and .is-landscape) */
-/* Phone layout override (JS adds .is-phone and .is-landscape) */
     body.is-phone:not(.is-landscape) #dashboard { grid-template-columns: 1fr !important; }
     body.is-phone.is-landscape #dashboard { grid-template-columns: repeat(2, 1fr) !important; }
 
@@ -402,155 +411,38 @@
 }
 
 
-/* Floating action buttons (right edge) */
-#fab-stack{
-  position: fixed;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: auto;
-}
-
-.fab-btn{
-  width: 44px;
-  height: 44px;
+/* Panel jump + About (no modals) */
+.panel-jump{
+  max-width: 220px;
+  padding: 4px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.22);
-  background: rgba(20,20,20,0.88);
-  color: #fff;
-  font-size: 18px;
-  line-height: 44px;
-  text-align: center;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  border: 1px solid #444;
+  background: #262626;
+  color: #eee;
+  font-size: 12px;
 }
 
-.fab-btn:active{ transform: scale(0.98); }
-.fab-btn:focus{ outline: 2px solid rgba(255,255,255,0.35); outline-offset: 2px; }
-
-/* Hide FAB on larger screens where the grid is easy to navigate */
-@media (min-width: 1100px) {
-  #fab-panels{ display: none; }
-}
-
-/* Modal */
-.modal-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 10000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 14px;
-}
-.modal-overlay[hidden]{ display: none !important; }
-
-.modal-card{
-  width: min(560px, 96vw);
-  max-height: 78vh;
-  background: rgba(18,18,18,0.98);
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.10);
-}
-
-.modal-title{
-  font-size: 14px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  opacity: 0.9;
-}
-
-.modal-close{
-  width: 36px;
-  height: 36px;
+.about-details{
+  margin: 6px auto 0;
+  max-width: 720px;
+  background: #181818;
+  border: 1px solid #333;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(40,40,40,0.7);
-  color: #fff;
-  font-size: 22px;
-  line-height: 34px;
+  padding: 6px 10px;
 }
 
-.modal-body{
-  padding: 12px;
-  overflow: auto;
-}
-
-.modal-hint{
-  font-size: 12px;
-  opacity: 0.75;
-  margin-bottom: 10px;
-}
-
-.panel-picker-list{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.panel-picker-btn{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(28,28,28,0.92);
-  color: #fff;
-  font-size: 14px;
-  text-align: left;
-}
-
-.panel-picker-btn .pp-sub{
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.about-h{
-  margin-top: 10px;
-  font-weight: 700;
+.about-details summary{
+  cursor: pointer;
   font-size: 13px;
-  opacity: 0.95;
+  font-weight: 600;
 }
-.about-p{
+
+.about-body{
+  margin-top: 6px;
   font-size: 13px;
   line-height: 1.35;
-  opacity: 0.92;
-  margin: 0 0 8px 0;
+  color: #ddd;
 }
-.about-ul{
-  margin: 6px 0 0 18px;
-  padding: 0;
-  font-size: 13px;
-  line-height: 1.35;
-  opacity: 0.92;
-}
-
-@media (max-width: 520px) and (orientation: portrait) {
-  #fab-stack{ right: 8px; }
-  .modal-card{ max-height: 84vh; }
-}
-
-
-body.modal-open{ overflow:hidden; }
 
 </style>
 </head>
@@ -565,7 +457,26 @@ body.modal-open{ overflow:hidden; }
       <label for="frameSlider">Song number:</label>
       <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
       <div id="frameLabel">0</div>
-      <button id="about-btn" class="cell-toggle" type="button" style="margin-left:auto;">About</button>
+
+  <details id="about-details" class="about-details">
+    <summary>About</summary>
+    <div class="about-body">
+      <p>
+        This is a standalone, one-page dashboard for WXPN’s <strong>885 Greatest Cover Songs</strong> countdown.
+      </p>
+      <ul>
+        <li>Runs entirely in the browser (GitHub Pages)</li>
+        <li>Audio uses embedded previews when available</li>
+        <li>Use “Jump to panel…” on phones to navigate quickly</li>
+        <li>Detach the player to keep listening while scrolling</li>
+      </ul>
+    </div>
+  </details>
+
+
+      <label for="panel-jump" style="margin-left:10px;">Panel:</label>
+      <select id="panel-jump" class="panel-jump"><option value="">Jump to panel…</option></select>
+
     </div>
   </div>
 
@@ -1546,171 +1457,44 @@ window.addEventListener("load", applyResponsiveDeviceClass);
 window.addEventListener("resize", applyResponsiveDeviceClass);
 
 
-</script>
 
-  <!-- Floating Controls (Phone-friendly) -->
-  <div id="fab-stack" aria-label="Quick controls">
-    <button id="fab-panels" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="panel-picker-modal" title="Panels">☰</button>
-    </div>
+// ----------------------------- Panel jump (no modals) -----------------------------
+(function initPanelJump(){
+  const sel = document.getElementById("panel-jump");
+  const dashboard = document.getElementById("dashboard");
+  if (!sel || !dashboard) return;
 
-  <!-- Panel Picker Modal -->
-  <div id="panel-picker-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="panel-picker-title" hidden>
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title" id="panel-picker-title">Panels</div>
-        <button class="modal-close" type="button" data-modal-close="panel-picker-modal" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-hint">Tap a panel to jump to it and expand it.</div>
-        <div id="panel-picker-list" class="panel-picker-list"></div>
-      </div>
-    </div>
-  </div>
+  const cells = Array.from(dashboard.querySelectorAll(".cell")).filter(c => c.id);
 
-  <!-- About Modal -->
-  <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title" hidden>
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title" id="about-title">About</div>
-        <button class="modal-close" type="button" data-modal-close="about-modal" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <p class="about-p">
-          This is a standalone, one‑page dashboard for the WXPN “885 Greatest Cover Songs” countdown.
-          It runs entirely in your browser (GitHub Pages) and loads a single JSON data file.
-        </p>
-        <div class="about-section">
-          <div class="about-h">Audio previews</div>
-          <p class="about-p">
-            The Play button uses embedded previews (where available) from Spotify and/or Deezer. No subscriber login is required.
-            If a track isn’t available for embedding, you’ll see a message instead of a player.
-          </p>
-        </div>
-        <div class="about-section">
-          <div class="about-h">Tips</div>
-          <ul class="about-ul">
-            <li>On phones, use the ☰ button to jump to any panel.</li>
-            <li>Tap a panel header’s Hide/Show button to collapse or expand it.</li>
-            <li>Use Detach on the player to keep listening while scrolling (when supported).</li>
-          </ul>
-        </div>
-        <div class="about-section">
-          <div class="about-h">Data & IDs</div>
-          <p class="about-p">
-            Tracks may include MusicBrainz IDs to improve matching across services; these identifiers are open data.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  cells.forEach(cell => {
+    const titleEl = cell.querySelector(".cell-title");
+    const title = titleEl ? titleEl.textContent.trim() : cell.id;
+    const opt = document.createElement("option");
+    opt.value = cell.id;
+    opt.textContent = title;
+    sel.appendChild(opt);
+  });
 
+  sel.addEventListener("change", () => {
+    const id = sel.value;
+    if (!id) return;
+    const cell = document.getElementById(id);
+    if (!cell) return;
 
-<script>
-// ----------------------------- Panels jump menu + About (safe init) -----------------------------
-(function(){
-  function ready(fn){
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
-    else fn();
-  }
+    // Expand using existing collapse conventions
+    cell.classList.remove("is-collapsed");
+    const body = cell.querySelector(".cell-body");
+    if (body) body.style.display = "";
+    const btn = cell.querySelector(".cell-toggle");
+    if (btn) btn.textContent = "Hide";
 
-  ready(function initFabAndModals(){
-    const dashboard = document.getElementById("dashboard");
-    const modalPanel = document.getElementById("panel-picker-modal");
-    const modalAbout = document.getElementById("about-modal");
-    const list = document.getElementById("panel-picker-list");
+    const y = cell.getBoundingClientRect().top + window.scrollY - 10;
+    window.scrollTo({ top: y, behavior: "smooth" });
 
-    function openModal(el){
-      if (!el) return;
-      el.hidden = false;
-      document.body.classList.add("modal-open");
-    }
-    function closeModal(el){
-      if (!el) return;
-      el.hidden = true;
-      const anyOpen = Array.from(document.querySelectorAll(".modal-overlay")).some(m => !m.hidden);
-      if (!anyOpen) document.body.classList.remove("modal-open");
-    }
-
-    // Backdrop closes
-    [modalPanel, modalAbout].forEach(m => {
-      if (!m) return;
-      m.addEventListener("click", (e) => { if (e.target === m) closeModal(m); });
-    });
-
-    // Close buttons via data attribute
-    document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest ? e.target.closest("[data-modal-close]") : null;
-      if (!btn) return;
-      const id = btn.getAttribute("data-modal-close");
-      const m = document.getElementById(id);
-      if (m) closeModal(m);
-    });
-
-    // ESC closes
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeModal(modalPanel);
-        closeModal(modalAbout);
-      }
-    });
-
-    // Build panel list
-    function escapeHtml(s){
-      return String(s)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function buildPanelList(){
-      if (!dashboard || !list) return;
-      list.innerHTML = "";
-      const cells = Array.from(dashboard.querySelectorAll(".cell"));
-      cells.forEach(cell => {
-        if (!cell.id) return;
-        const titleEl = cell.querySelector(".cell-title");
-        const title = titleEl ? titleEl.textContent.trim() : cell.id;
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "panel-picker-btn";
-        btn.innerHTML = `<span>${escapeHtml(title)}</span><span class="pp-sub">Jump</span>`;
-        btn.addEventListener("click", () => {
-          // Expand panel: use the existing toggle mechanism if present
-          const body = cell.querySelector(".cell-body");
-          const toggle = cell.querySelector(".cell-toggle");
-          if (body) body.style.display = "";
-          cell.classList.remove("is-collapsed");
-          cell.classList.add("is-expanded");
-          if (toggle) toggle.textContent = "Hide";
-
-          closeModal(modalPanel);
-          const y = cell.getBoundingClientRect().top + window.scrollY - 12;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        });
-        list.appendChild(btn);
-      });
-    }
-
-    // Panels button (FAB)
-    const fabPanels = document.getElementById("fab-panels");
-    if (fabPanels) {
-      fabPanels.addEventListener("click", () => {
-        buildPanelList();
-        openModal(modalPanel);
-      });
-    }
-
-    // About button (top bar)
-    const aboutBtn = document.getElementById("about-btn");
-    if (aboutBtn) {
-      aboutBtn.addEventListener("click", () => openModal(modalAbout));
-    }
+    sel.value = "";
   });
 })();
-</script>
 
+</script>
 </body>
 </html>
