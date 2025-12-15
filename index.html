@@ -411,17 +411,6 @@
 }
 
 
-/* Panel jump + About (no modals) */
-.panel-jump{
-  max-width: 220px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid #444;
-  background: #262626;
-  color: #eee;
-  font-size: 12px;
-}
-
 .about-details{
   margin: 6px auto 0;
   max-width: 720px;
@@ -481,7 +470,6 @@ html, body { overflow-x: hidden; }
   #controls-inner label{
     width: auto;
   }
-  .panel-jump{ max-width: 100%; }
   .about-btn{ width: 100%; }
 }
 
@@ -497,11 +485,6 @@ html, body { overflow-x: hidden; }
     <div id="controls-inner">
       <label for="frameSlider">Song number:</label>
       <input type="range" id="frameSlider" min="0" max="0" value="0" step="1" />
-      
-      <div class="control-row">
-        <label for="panel-jump">Panel:</label>
-        <select id="panel-jump" class="panel-jump"><option value="">Jump to panel…</option></select>
-      </div>
 <div id="frameLabel">0</div>
 
   <details id="about-details" class="about-details">
@@ -1497,44 +1480,6 @@ function applyResponsiveDeviceClass() {
 window.addEventListener("load", applyResponsiveDeviceClass);
 window.addEventListener("resize", applyResponsiveDeviceClass);
 
-
-
-// ----------------------------- Panel jump (no modals) -----------------------------
-(function initPanelJump(){
-  const sel = document.getElementById("panel-jump");
-  const dashboard = document.getElementById("dashboard");
-  if (!sel || !dashboard) return;
-
-  const cells = Array.from(dashboard.querySelectorAll(".cell")).filter(c => c.id);
-
-  cells.forEach(cell => {
-    const titleEl = cell.querySelector(".cell-title");
-    const title = titleEl ? titleEl.textContent.trim() : cell.id;
-    const opt = document.createElement("option");
-    opt.value = cell.id;
-    opt.textContent = title;
-    sel.appendChild(opt);
-  });
-
-  sel.addEventListener("change", () => {
-    const id = sel.value;
-    if (!id) return;
-    const cell = document.getElementById(id);
-    if (!cell) return;
-
-    // Expand using existing collapse conventions
-    cell.classList.remove("is-collapsed");
-    const body = cell.querySelector(".cell-body");
-    if (body) body.style.display = "";
-    const btn = cell.querySelector(".cell-toggle");
-    if (btn) btn.textContent = "Hide";
-
-    const y = cell.getBoundingClientRect().top + window.scrollY - 10;
-    window.scrollTo({ top: y, behavior: "smooth" });
-
-    sel.value = "";
-  });
-})();
 
 
 // ----------------------------- About toggle (no modals) -----------------------------
