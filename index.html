@@ -20,7 +20,9 @@
   function closeModal(el){
     if (!el) return;
     el.hidden = true;
-    document.body.classList.remove("modal-open");
+    // If no modals are open, unlock body
+    const anyOpen = Array.from(document.querySelectorAll(".modal-overlay")).some(m => !m.hidden);
+    if (!anyOpen) document.body.classList.remove("modal-open");
   }
 
   // Click backdrop to close
@@ -36,15 +38,8 @@
     const btn = e.target.closest && e.target.closest("[data-modal-close]");
     if (!btn) return;
     const id = btn.getAttribute("data-modal-close");
-    closeModal(document.getElementById(id));
-  });
-
-  // Direct close button listeners (extra-safe)
-  document.querySelectorAll(".modal-close").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const id = btn.getAttribute("data-modal-close");
-      if (id) closeModal(document.getElementById(id));
-    });
+    const m = document.getElementById(id);
+    if (m) closeModal(m);
   });
 
   // ESC closes
@@ -61,10 +56,9 @@
     list.innerHTML = "";
     const cells = Array.from(dashboard.querySelectorAll(".cell"));
     cells.forEach(cell => {
-      const titleEl = cell.querySelector(".cell-title");
-      const title = titleEl ? titleEl.textContent.trim() : (cell.id || "Panel");
-      // Skip if no id
       if (!cell.id) return;
+      const titleEl = cell.querySelector(".cell-title");
+      const title = titleEl ? titleEl.textContent.trim() : cell.id;
 
       const btn = document.createElement("button");
       btn.type = "button";
@@ -73,12 +67,11 @@
       btn.addEventListener("click", () => {
         // Expand the panel if it's collapsed
         cell.classList.remove("is-collapsed");
-        // If your code toggles via button text, keep it in sync where possible
         const toggle = cell.querySelector(".cell-toggle");
         if (toggle) toggle.textContent = "Hide";
+
         closeModal(modalPanel);
 
-        // Scroll with a bit of top padding
         const y = cell.getBoundingClientRect().top + window.scrollY - 12;
         window.scrollTo({ top: y, behavior: "smooth" });
       });
@@ -96,21 +89,19 @@
       .replace(/'/g, "&#039;");
   }
 
-  // FAB handlers
+  // Panels FAB handler (mobile convenience)
   const fabPanels = document.getElementById("fab-panels");
-  const fabAbout = document.getElementById("fab-about");
-
   if (fabPanels) {
     fabPanels.addEventListener("click", () => {
       buildPanelList();
       openModal(modalPanel);
-    }
-  const aboutBtn = document.getElementById("about-btn");
-  if (aboutBtn) { aboutBtn.addEventListener("click", () => openModal(modalAbout)); }
-);
+    });
   }
-  if (fabAbout) {
-    fabAbout.addEventListener("click", () => openModal(modalAbout));
+
+  // About button in top control bar (all devices)
+  const aboutBtn = document.getElementById("about-btn");
+  if (aboutBtn) {
+    aboutBtn.addEventListener("click", () => openModal(modalAbout));
   }
 })();
 
