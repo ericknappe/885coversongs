@@ -2,354 +2,379 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Responsive + iOS safe-area -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WXPN 885 Greatest Cover Songs – Countdown Dashboard</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+
   <style>
     * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
+    body{
+      margin:0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #111;
-      color: #eee;
+      background:#111;
+      color:#eee;
 
-      height: 100vh;
-      overflow: hidden; /* Option 1: page doesn't scroll */
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      flex: 0 0 auto;
-      padding: 6px 0 2px;
-      text-align: center;
-      background: #111;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #f5f5f5;
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
 
-    #controls {
-      flex: 0 0 auto;
-      padding: 4px 0 8px;
-      background: #111;
-      display: flex;
-      justify-content: center;
-      border-bottom: 1px solid #222;
+    header{
+      flex:0 0 auto;
+      padding:6px 0 2px;
+      text-align:center;
+      background:#111;
     }
-    #controls-inner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      max-width: 720px;
-      width: 100%;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: #222;
-      border: 1px solid #333;
+    header h1{
+      margin:0;
+      font-size:20px;
+      font-weight:600;
+      color:#f5f5f5;
     }
-    #controls-inner label {
-      white-space: nowrap;
-      font-size: 13px;
-      color: #eee;
+
+    /* Fixed control bar */
+    #controls{
+      flex:0 0 auto;
+      padding:4px 0 8px;
+      background:#111;
+      display:flex;
+      justify-content:center;
+      border-bottom:1px solid #222;
     }
-    #frameLabel {
-      min-width: 64px;
-      text-align: right;
+    #controls-inner{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      max-width:760px;
+      width:100%;
+      padding:6px 14px;
+      border-radius:999px;
+      background:#222;
+      border:1px solid #333;
+    }
+    #controls-inner label{
+      white-space:nowrap;
+      font-size:13px;
+      color:#eee;
+    }
+    #frameLabel{
+      min-width:64px;
+      text-align:right;
       font-variant-numeric: tabular-nums;
-      font-size: 13px;
+      font-size:13px;
     }
 
     /* Finger-friendly slider */
-    #frameSlider {
-      flex: 1;
-      height: 22px;
-      -webkit-appearance: none;
-      background: transparent;
+    #frameSlider{
+      flex:1;
+      height:22px;
+      -webkit-appearance:none;
+      background:transparent;
       touch-action: pan-y;
     }
-    #frameSlider::-webkit-slider-runnable-track {
-      height: 6px;
-      background: #444;
-      border-radius: 999px;
+    #frameSlider::-webkit-slider-runnable-track{
+      height:6px;
+      background:#444;
+      border-radius:999px;
     }
-    #frameSlider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #eee;
-      border: 2px solid #111;
-      margin-top: -9px;
+    #frameSlider::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      background:#eee;
+      border:2px solid #111;
+      margin-top:-9px;
     }
-    #frameSlider::-moz-range-track {
-      height: 6px;
-      background: #444;
-      border-radius: 999px;
+    #frameSlider::-moz-range-track{
+      height:6px;
+      background:#444;
+      border-radius:999px;
     }
-    #frameSlider::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #eee;
-      border: 2px solid #111;
+    #frameSlider::-moz-range-thumb{
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      background:#eee;
+      border:2px solid #111;
     }
 
-    /* Dashboard is the scroll container */
-    #dashboard {
-      flex: 1 1 auto;
-      overflow-y: auto;
+    /* Dashboard scroll container */
+    #dashboard{
+      flex:1 1 auto;
+      overflow-y:auto;
       -webkit-overflow-scrolling: touch;
 
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: 42px;      /* base row unit */
-      grid-auto-flow: dense;     /* pack collapsed tiles upward */
-      gap: 6px;
-      padding: 6px;
+      display:grid;
+      grid-auto-rows:42px;
+      grid-auto-flow:dense;
+      gap:6px;
+      padding:6px;
     }
 
-    @media (max-width: 1200px) { #dashboard { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 800px)  { #dashboard { grid-template-columns: repeat(2, 1fr); } }
+    /* ===== Responsive layout rules ===== */
+    /* Desktop/laptop: 3 columns */
+    #dashboard{ grid-template-columns: repeat(3, 1fr); }
 
-    .cell {
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 4px 5px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      min-height: 0;
+    /* iPad portrait: 2 columns */
+    @media (max-width: 1100px) and (orientation: portrait){
+      #dashboard{ grid-template-columns: repeat(2, 1fr); }
+    }
+    /* iPad landscape: 3 columns */
+    @media (max-width: 1400px) and (orientation: landscape){
+      #dashboard{ grid-template-columns: repeat(3, 1fr); }
+    }
+    /* Backup: iPhone portrait forces 1 column */
+    @media (max-width: 520px) and (orientation: portrait){
+      #dashboard{ grid-template-columns: 1fr !important; }
+    }
+    /* iPhone landscape: 2 columns */
+    @media (max-width: 900px) and (orientation: landscape){
+      #dashboard{ grid-template-columns: repeat(2, 1fr) !important; }
+    }
+    /* Optional JS helper (wins reliably on phones) */
+    body.is-phone:not(.is-landscape) #dashboard{ grid-template-columns: 1fr !important; }
+    body.is-phone.is-landscape #dashboard{ grid-template-columns: repeat(2, 1fr) !important; }
+
+    .panel{
+      background:#181818;
+      border:1px solid #333;
+      border-radius:6px;
+      padding:4px 5px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      min-height:0;
       cursor: move;
     }
-    .cell.is-expanded { grid-row: span 8; }
-    .cell.is-collapsed { grid-row: span 1; padding-bottom: 0; }
-    .cell.is-collapsed .cell-header { margin-bottom: 0; }
+    .panel.is-expanded{ grid-row: span 8; }
+    .panel.is-collapsed{ grid-row: span 1; padding-bottom: 0; }
+    .panel.is-collapsed .panel-header{ margin-bottom: 0; }
 
-    .cell-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 2px;
+    .panel-header{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin-bottom:2px;
     }
-    .cell-title {
-      flex: 1;
-      font-size: 13px;
-      font-weight: 600;
-      color: #f0f0f0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: center;
+    .panel-title{
+      flex:1;
+      font-size:13px;
+      font-weight:600;
+      color:#f0f0f0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-align:center;
     }
-    .cell-toggle {
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid #444;
-      background: #262626;
-      color: #eee;
-      cursor: pointer;
+    .panel-toggle{
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid #444;
+      background:#262626;
+      color:#eee;
+      cursor:pointer;
     }
-    .cell-toggle:hover { background: #333; }
+    .panel-toggle:hover{ background:#333; }
 
-    .cell-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-    svg.chart {
-      width: 100%;
-      height: 100%;
-      display: block;
+    .panel-body{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
     }
 
-    #current-song {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      text-align: center;
-      gap: 8px;
-      padding-top: 4px;
-      min-height: 0;
+    svg.chart{
+      width:100%;
+      height:100%;
+      display:block;
     }
 
-    /* fixed art box to prevent jumpiness */
-    #current-song img {
-      max-width: 70%;
-      height: 160px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.7);
-      object-fit: cover;
-      background: #000;
+    /* ===== Current item ===== */
+    #current-item{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      text-align:center;
+      gap:8px;
+      padding-top:4px;
+      min-height:0;
+    }
+    #current-item img{
+      max-width:70%;
+      height:160px;
+      border-radius:8px;
+      box-shadow:0 0 8px rgba(0,0,0,0.7);
+      object-fit:cover;
+      background:#000;
       transition: opacity 0.2s ease-in-out;
     }
-    #current-song img.no-art {
-      opacity: 0;
-      box-shadow: none;
+    #current-item img.no-art{
+      opacity:0;
+      box-shadow:none;
+    }
+    #current-item .item-title{ font-size:15px; font-weight:600; }
+    #current-item .item-artist{ font-size:14px; color:#ccc; }
+    #current-item .item-meta{ font-size:13px; color:#aaa; }
+
+    .dragging{ opacity:0.6; outline:2px dashed #888; }
+    @media (pointer: coarse){ .panel{ cursor: default; } }
+    @media (max-width: 800px){
+      header h1{ font-size:18px; }
+      .panel-title{ font-size:15px; }
+      #current-item .item-title{ font-size:17px; }
+      #current-item .item-artist{ font-size:15px; }
+      #current-item .item-meta{ font-size:14px; }
     }
 
-    #current-song .song-title { font-size: 15px; font-weight: 600; }
-    #current-song .song-artist { font-size: 14px; color: #ccc; }
-    #current-song .song-meta { font-size: 13px; color: #aaa; }
-
-    .dragging { opacity: 0.6; outline: 2px dashed #888; }
-
-    @media (pointer: coarse) { .cell { cursor: default; } }
-    @media (max-width: 800px) {
-      header h1 { font-size: 18px; }
-      .cell-title { font-size: 15px; }
-      #current-song .song-title { font-size: 17px; }
-      #current-song .song-artist { font-size: 15px; }
-      #current-song .song-meta { font-size: 14px; }
+    /* ===== Player UI ===== */
+    .player-actions{ margin-top:8px; display:flex; gap:8px; justify-content:center; }
+    .player-actions button{
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #444;
+      background:#262626;
+      color:#eee;
+      cursor:pointer;
     }
+    .player-actions button:hover{ background:#333; }
 
-    /* ===== Current Song Player UI ===== */
-    .player-actions { margin-top: 8px; display:flex; gap:8px; justify-content:center; }
-    .player-actions button {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #444;
-      background: #262626;
-      color: #eee;
-      cursor: pointer;
-    }
-    .player-actions button:hover { background:#333; }
-
-    .player-links { margin-top: 8px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    .player-links a {
+    .player-links{ margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .player-links a{
       text-decoration:none;
       border:1px solid rgba(255,255,255,.16);
       padding:4px 8px;
       border-radius:999px;
       color:#eee;
-      font-size: 11px;
+      font-size:11px;
     }
-    .player-links a:hover { border-color: rgba(255,255,255,.28); }
+    .player-links a:hover{ border-color: rgba(255,255,255,.28); }
 
     .player-unavailable{
-      font-size: 11px;
-      color: #bdbdbd;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px dashed rgba(255,255,255,.25);
+      font-size:11px;
+      color:#bdbdbd;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px dashed rgba(255,255,255,.25);
       background: rgba(255,255,255,.04);
-      white-space: nowrap;
+      white-space:nowrap;
     }
 
-    .hidden { display:none !important; }
+    .hidden{ display:none !important; }
 
-    /* ===== Floating detachable player ===== */
-    .floating-player {
-      position: fixed;
-      right: 12px;
-      bottom: 12px;
-      width: min(520px, calc(100vw - 24px));
+    /* ===== Floating player ===== */
+    .floating-player{
+      position:fixed;
+      right:12px;
+      bottom:12px;
+      width:min(520px, calc(100vw - 24px));
       max-height: calc(100vh - 24px);
-      overflow: auto;
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.45);
-      z-index: 9999;
+      overflow:auto;
+      background:#181818;
+      border:1px solid #333;
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45);
+      z-index:9999;
     }
-    .floating-bar {
-      position: sticky;
-      top: 0;
-      background: #181818;
-      padding: 8px 10px;
-      border-bottom: 1px solid #2a2a2a;
+    .floating-bar{
+      position:sticky;
+      top:0;
+      background:#181818;
+      padding:8px 10px;
+      border-bottom:1px solid #2a2a2a;
       display:flex;
       justify-content: space-between;
       align-items:center;
-      gap: 8px;
+      gap:8px;
     }
-    .floating-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #eee;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .floating-title{
+      font-size:12px;
+      font-weight:600;
+      color:#eee;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .floating-bar button {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #444;
-      background: #262626;
-      color: #eee;
-      cursor: pointer;
+    .floating-bar button{
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid #444;
+      background:#262626;
+      color:#eee;
+      cursor:pointer;
     }
-    .floating-bar button:hover { background:#333; }
-
-    .floating-embed-wrap {
-      padding: 10px;
+    .floating-bar button:hover{ background:#333; }
+    .floating-embed-wrap{ padding:10px; }
+    .floating-embed-wrap iframe{
+      width:100%;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,0.22);
+      background:#0f0f0f;
+      display:block;
     }
-
-    .floating-embed-wrap iframe {
-      width: 100%;
-      border-radius: 10px;
-      border: 2px solid rgba(255,255,255,0.22);
-      background: #0f0f0f;
-      display: block;
-    }
-
-    /* On smaller screens, dock player more centrally */
-    @media (max-width: 700px) {
+    @media (max-width: 700px){
       .floating-player{
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        width: auto;
-        max-height: 60vh;
+        left:10px;
+        right:10px;
+        bottom:10px;
+        width:auto;
+        max-height:60vh;
       }
     }
 
-    /* ===== Next 10 Songs list ===== */
-    .recent-songs { width:100%; overflow:auto; max-height:100%; padding: 6px 10px 10px; }
-    .recent-table { width:100%; border-collapse: collapse; font-size: 12px; }
-    .recent-table thead th {
-      position: sticky; top: 0;
-      background: rgba(20,20,20,0.95);
-      color: #ddd;
-      text-align: left;
-      padding: 6px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      white-space: nowrap;
-      z-index: 2;
+    /* ===== Next items ===== */
+    .next-items{ width:100%; overflow:auto; max-height:100%; padding: 6px 10px 10px; isolation:isolate; }
+    .next-table{ width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; font-size:12px; position:relative; }
+    .next-table thead{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #141414;
+      transform: translateZ(0);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.35);
     }
-    .recent-table tbody td {
-      padding: 6px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      vertical-align: top;
+    .next-table thead th{
+      background: #141414;
+      color:#ddd;
+      text-align:left;
+      padding:6px 6px;
+      border-bottom:1px solid rgba(255,255,255,0.12);
+      white-space:nowrap;
     }
-    .recent-table tbody tr { cursor: pointer; }
-    .recent-table tbody tr:hover { background: rgba(255,255,255,0.04); }
-    .recent-table td:nth-child(1) { width: 54px; opacity: 0.9; }
+    .next-table tbody td{
+      padding:6px 6px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      vertical-align:top;
+    }
+    /* Stabilize column widths (fixed layout) without forcing ellipsis.
+       Let body cells wrap; keep headers readable. */
+    .next-table td, .next-table th{ overflow:hidden; text-overflow:clip; }
+    .next-table td:nth-child(1), .next-table th:nth-child(1){ width:56px; white-space:nowrap; }
+    .next-table thead th{ white-space:nowrap; }
+    .next-table tbody td:nth-child(2),
+    .next-table tbody td:nth-child(3),
+    .next-table tbody td:nth-child(4){
+      white-space:normal;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      line-height:1.2;
+    }
+    .next-table tbody tr{ cursor:pointer; }
+    .next-table tbody tr:hover{ background: rgba(255,255,255,0.04); }
+    .next-table td:nth-child(1){ width:54px; opacity:0.9; }
 
-    /* Next 10 Songs panel: slightly smaller fonts + padding that matches other tiles */
-    #cell9 .cell-body { padding-left: 14px; padding-right: 14px; }
-    #cell9 .cell-header { padding-left: 14px; padding-right: 14px; }
-    #cell9 table { font-size: 12px; }
-    #cell9 th { font-size: 11px; opacity: 0.9; }
-    #cell9 td { padding-top: 6px; padding-bottom: 6px; }
-
-    /* Tighten Next 10 Songs in denser layouts */
-    @media (min-width: 600px) and (max-width: 1200px) {
-      #cell9 .recent-table { font-size: 11px; }
-      #cell9 td { padding-top: 4px; padding-bottom: 4px; }
-      #cell9 .cell-body { max-height: 240px; overflow-y: auto; padding-left: 10px; padding-right: 10px; }
-    }
+    #panel-next-items .panel-body{ padding-left:14px; padding-right:14px; }
+    #panel-next-items .panel-header{ padding-left:14px; padding-right:14px; }
+    #panel-next-items table{ font-size:12px; }
+    #panel-next-items th{ font-size:11px; opacity:0.9; }
+    #panel-next-items td{ padding-top:6px; padding-bottom:6px; }
   </style>
 </head>
 
@@ -367,20 +392,20 @@
   </div>
 
   <div id="dashboard">
-    <!-- Current Song -->
-    <div class="cell draggable-cell is-expanded" id="cell2">
-      <div class="cell-header">
-        <span class="cell-title">Current Song</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <!-- 1) Current item -->
+    <div class="panel is-draggable is-expanded" id="panel-current-item">
+      <div class="panel-header">
+        <span class="panel-title">Current Song</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body">
-        <div id="current-song">
+      <div class="panel-body">
+        <div id="current-item">
           <img id="current-album-art" src="" alt="" class="no-art" />
-          <div class="song-title" id="current-song-title">Loading…</div>
-          <div class="song-artist" id="current-song-artist"></div>
-          <div class="song-meta" id="current-song-meta"></div>
+          <div class="item-title" id="current-song-title">Loading…</div>
+          <div class="item-artist" id="current-song-artist"></div>
+          <div class="item-meta" id="current-song-meta"></div>
 
-          <div id="current-player-actions" class="player-actions">
+          <div class="player-actions">
             <button id="player-play-btn" type="button">Play</button>
             <span id="player-unavailable-msg" class="player-unavailable hidden"></span>
           </div>
@@ -390,15 +415,16 @@
       </div>
     </div>
 
-    <!-- Next 10 Songs -->
-    <div class="cell draggable-cell is-expanded" id="cell9">
-      <div class="cell-header">
-        <span class="cell-title">Next 10 Songs</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <!-- 2) Next items -->
+    <div class="panel is-draggable is-expanded" id="panel-next-items">
+      <div class="panel-header">
+        <span class="panel-title">Next 10 Songs</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body">
-        <div class="recent-songs">
-          <table class="recent-table">
+      <div class="panel-body">
+        <div class="next-items">
+          <table class="next-table">
+            <colgroup><col style="width:56px"><col style="width:36%"><col style="width:32%"><col style="width:32%"></colgroup>
             <thead><tr><th>Rank</th><th>Song</th><th>Artist</th><th>Original</th></tr></thead>
             <tbody id="recent-songs-body"></tbody>
           </table>
@@ -406,60 +432,78 @@
       </div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell1">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Artists</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <!-- 3..(3+8) Chart slots (max 9 slots) -->
+    
+    <div class="panel is-draggable is-expanded" id="panel-chart-1" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-artists"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell3">
-      <div class="cell-header">
-        <span class="cell-title">Most Frequent Cover Artists</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-2" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-cover-artists"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell4">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Years</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-3" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-years"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell5">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Decades</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-4" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-decades"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell6">
-      <div class="cell-header">
-        <span class="cell-title">Most Frequent Cover Years</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-5" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-cover-years"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell7">
-      <div class="cell-header">
-        <span class="cell-title">Most Covered Original Songs</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-6" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-orig-songs"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
 
-    <div class="cell draggable-cell is-expanded" id="cell8">
-      <div class="cell-header">
-        <span class="cell-title">Most Represented Genres</span>
-        <button class="cell-toggle" type="button">Hide</button>
+    <div class="panel is-draggable is-expanded" id="panel-chart-7" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
       </div>
-      <div class="cell-body"><svg class="chart" id="chart-genres"></svg></div>
+      <div class="panel-body"><svg class="chart"></svg></div>
+    </div>
+
+    <div class="panel is-draggable is-expanded" id="panel-chart-8" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
+      </div>
+      <div class="panel-body"><svg class="chart"></svg></div>
+    </div>
+
+    <div class="panel is-draggable is-expanded" id="panel-chart-9" data-panel="chart-slot">
+      <div class="panel-header">
+        <span class="panel-title">Chart</span>
+        <button class="panel-toggle" type="button">Hide</button>
+      </div>
+      <div class="panel-body"><svg class="chart"></svg></div>
     </div>
   </div>
 
@@ -476,30 +520,29 @@
   </div>
 
 <script>
+/* ==========================================================
+   Config
+   - Local runs must use a small server (CORS/file://):
+     python3 -m http.server
+   ========================================================== */
 const urlParams = new URLSearchParams(window.location.search);
 const DATA_ENDPOINT = urlParams.get("data_endpoint") || "data/2025_885_annotated.json";
 
-const MIN_COUNT_ORIG_ARTIST = 2;
-const MIN_COUNT_COVER_ARTIST = 2;
-const MIN_COUNT_GENRE = 3;
-const MIN_COUNT_ORIG_SONG = 2;
-const MIN_COUNT_DECADE = 2;
-const MIN_COUNT_ORIG_YEAR = 2;
-const MIN_COUNT_COVER_YEAR = 2;
-
-const MIN_DISPLAY_COUNT = 2;
+/* Defaults (cover-mode set; future variants can swap metric sets) */
+const MIN_DISPLAY_COUNT = 2;          // minimum to display on a chart at a given frame
 const MOMENTUM_WINDOW = 20;
 const FAST_RISER_THRESHOLD = 5;
 
-const TOP_N_ARTISTS = 15;
-const TOP_N_ORIG_SONGS = 15;
+const TOP_N_DEFAULT = 15;
 const TOP_N_GENRES = 20;
 const TOP_N_DECADES = 10;
 const TOP_N_YEARS = 15;
+const TOP_N_ORIG_SONGS = 15;
 
 const MAX_LABEL_CHARS = 25;
 const BAR_HEIGHT_FACTOR = 1/3;
 
+/* Elements */
 const frameSlider = document.getElementById("frameSlider");
 const frameLabel  = document.getElementById("frameLabel");
 
@@ -507,68 +550,389 @@ const currentAlbumArt  = document.getElementById("current-album-art");
 const currentSongTitle = document.getElementById("current-song-title");
 const currentSongArtist= document.getElementById("current-song-artist");
 const currentSongMeta  = document.getElementById("current-song-meta");
-const recentSongsBody = document.getElementById("recent-songs-body");
-var rankToRow = {};
-var rankToFrameIndex = {};
+const recentSongsBody  = document.getElementById("recent-songs-body");
 
-/* ===================== Player (on-demand, floating) ===================== */
-(function () {
+/* State */
+let initialized = false;
+let sortedSongs = [];
+let frameRanks  = [];
+let metrics     = [];
+let metricState = {};
+let currentFrameIndex = 0;
+let rankToRow = {};
+let rankToFrameIndex = {};
+
+/* ==========================================================
+   Helpers (trim + CR/LF hygiene)
+   ========================================================== */
+function cleanText(v){
+  // Normalize strings coming from JSON / PHP exports:
+  // - trim whitespace
+  // - normalize CR/LF
+  // - unescape common PHP-style escapes (\')
+  return String(v == null ? "" : v)
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\r/g, "\n")
+    .replace(/\\'/g, "'")
+    .trim();
+}
+function escapeHtml(s){
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+function truncateLabel(label, maxLen){
+  const s = cleanText(label);
+  if (s.length <= maxLen) return s;
+  if (maxLen <= 1) return s.slice(0, maxLen);
+  return s.slice(0, maxLen - 1) + "…";
+}
+function parseYearFromString(value){
+  if (value === null || value === undefined) return null;
+  // Accept numbers directly
+  if (typeof value === "number" && isFinite(value)){
+    const y = Math.trunc(value);
+    if (y >= 1800 && y <= 2100) return y;
+    return null;
+  }
+  let s = cleanText(String(value));
+  if (!s) return null;
+  // Normalize any escaped quotes
+  s = s.replace(/\\"/g, '"');
+  // Prefer a clean 4-digit year; don't rely solely on word boundaries.
+  const m = s.match(/(18\d{2}|19\d{2}|20\d{2})/);
+  if (!m) return null;
+  const year = parseInt(m[0], 10);
+  if (isNaN(year) || year < 1800 || year > 2100) return null;
+  return year;
+}
+function computeDecade(year){
+  if (year === null || year === undefined || isNaN(year)) return null;
+  const y = parseInt(year, 10);
+  return (Math.floor(y / 10) * 10) + "s";
+}
+
+/* PHP-serialized genre extraction: grabs quoted strings */
+function parsePhpGenre(value){
+  // Supports PHP-serialized arrays like:
+  // a:4:{i:0;s:16:"psychedelic rock";...}
+  // Some JSON exports may double-escape quotes, yielding \" in the decoded string.
+  // Normalize those so extraction works reliably.
+  let s = cleanText(value);
+  if (!s) return [];
+  if (!s.startsWith("a:")) return [];
+  s = s.replace(/\"/g, '"');
+  const regex = /s:\d+:"(.*?)"/g;
+  const out = [];
+  let m;
+  while ((m = regex.exec(s)) !== null) out.push(m[1]);
+  return out.map(cleanText).filter(Boolean);
+}
+function parseGenreList(value){
+  const s = cleanText(value);
+  if (!s) return [];
+  const looksSerialized = s.startsWith("a:");
+  const php = parsePhpGenre(s);
+  if (looksSerialized){
+    // If it looks serialized but yields no strings (e.g., a:0:{}), treat as no genres.
+    return php.length ? php : [];
+  }
+  if (php.length) return php;
+  return [s];
+}
+
+/* ==========================================================
+   Next 10 Songs panel
+   ========================================================== */
+function renderUpcomingFromCurrent(currentRank){
+  if (!recentSongsBody) return;
+
+  const cr = Number(currentRank || 0);
+  if (!cr || isNaN(cr) || cr >= 885){
+    recentSongsBody.innerHTML = "";
+    return;
+  }
+
+  const start = cr;
+  const end = Math.min(885, cr + 9);
+
+  const rows = [];
+  for (let r = start; r <= end; r++){
+    const row = rankToRow[r];
+    if (row) rows.push(row);
+  }
+
+  let html = "";
+  for (let i=0; i<rows.length; i++){
+    const rr = rows[i];
+    const rank = rr.rank != null ? String(rr.rank) : "";
+    const song = escapeHtml(cleanText(rr.song));
+    const artist = escapeHtml(cleanText(rr.artist));
+    const orig = escapeHtml(cleanText(rr.originalArtist));
+    html += `<tr data-rank="${escapeHtml(rank)}"><td>${escapeHtml(rank)}</td><td>${song}</td><td>${artist}</td><td>${orig}</td></tr>`;
+  }
+  recentSongsBody.innerHTML = html;
+}
+
+/* ==========================================================
+   Charts (SVG horizontal bar charts, no external libs)
+   ========================================================== */
+const COLOR_PALETTE = [
+  "#4e79a7","#f28e2b","#e15759","#76b7b2","#59a14f",
+  "#edc948","#b07aa1","#ff9da7","#9c755f","#bab0ab",
+  "#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3",
+  "#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd",
+  "#ccebc5","#ffed6f"
+];
+function hashString(str){
+  const s = String(str || "");
+  let h = 2166136261;
+  for (let i=0; i<s.length; i++){
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0);
+}
+function colorForCategory(cat){
+  const idx = hashString(cat) % COLOR_PALETTE.length;
+  return COLOR_PALETTE[idx];
+}
+function chooseTickStep(maxVal){
+  if (maxVal <= 20) return 2;
+  if (maxVal <= 50) return 5;
+  if (maxVal <= 250) return 25;
+  if (maxVal <= 500) return 50;
+  return 100;
+}
+function clearSvg(svg){
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+}
+function svgEl(tag, attrs){
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  if (attrs){
+    Object.keys(attrs).forEach(k => el.setAttribute(k, String(attrs[k])));
+  }
+  return el;
+}
+function setupChart(svgElement, topN, globalMax, allowedSet){
+  const svg = svgElement;
+  clearSvg(svg);
+
+  const width = svg.clientWidth || 400;
+  const height = svg.clientHeight || 240;
+
+  let marginLeft;
+  if (width <= 360) marginLeft = 90;
+  else if (width <= 420) marginLeft = 105;
+  else if (width <= 500) marginLeft = 115;
+  else if (width <= 900) marginLeft = 150;
+  else marginLeft = 165;
+
+  const margin = { top: 4, right: 8, bottom: 18, left: marginLeft };
+  const innerWidth = Math.max(10, width - margin.left - margin.right);
+  const innerHeight = Math.max(10, height - margin.top - margin.bottom);
+
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+  const g = svgEl("g", { transform: `translate(${margin.left},${margin.top})` });
+  svg.appendChild(g);
+
+  const maxVal = Math.max(globalMax || 2, 2);
+  const step = chooseTickStep(maxVal);
+  const xMaxRounded = Math.ceil(maxVal / step) * step;
+
+  function xScale(v){
+    const vv = Math.max(0, Math.min(xMaxRounded, Number(v) || 0));
+    return (vv / xMaxRounded) * innerWidth;
+  }
+
+  // Grid + integer ticks
+  for (let t=0; t<=xMaxRounded; t += step){
+    const x = xScale(t);
+    g.appendChild(svgEl("line", { x1:x, y1:0, x2:x, y2:innerHeight, stroke:"#333", "stroke-dasharray":"2,2" }));
+    const tick = svgEl("text", { x:x, y:innerHeight+14, fill:"#ccc", "font-size":"9", "text-anchor":"middle" });
+    tick.textContent = String(t);
+    g.appendChild(tick);
+  }
+
+  const slotHeight = innerHeight / topN;
+  const barHeight = slotHeight * BAR_HEIGHT_FACTOR;
+
+  return { svg, g, xScale, slotHeight, barHeight, topN, allowed: allowedSet };
+}
+
+function updateChart(chart, frameCounts, prevFrameCounts, options){
+  const g = chart.g;
+  const oldLayer = chart._layer;
+  if (oldLayer && oldLayer.parentNode) oldLayer.parentNode.removeChild(oldLayer);
+  const layer = svgEl("g");
+  chart._layer = layer;
+  g.appendChild(layer);
+
+  const minDisplay = options.minDisplayCount;
+  const fastThreshold = options.fastRiserThreshold;
+
+  const entries = [];
+  const fc = frameCounts || {};
+  for (const k in fc){
+    const cat = k;
+    const cnt = fc[k];
+    if (!chart.allowed.has(cat)) continue;
+    if (cnt == null || cnt < minDisplay) continue;
+    entries.push([cat, cnt]);
+  }
+  entries.sort((a,b) => (b[1]-a[1]) || String(a[0]).localeCompare(String(b[0])));
+  const ordered = entries.slice(0, chart.topN);
+  const count = ordered.length;
+  if (!count) return;
+
+  const startSlot = chart.topN - count;
+  const slotPositions = [];
+  for (let i=0; i<count; i++){
+    const slotIndex = startSlot + i;
+    slotPositions.push(slotIndex * chart.slotHeight + (chart.slotHeight - chart.barHeight)/2);
+  }
+
+  const fastSet = new Set();
+  const pc = prevFrameCounts || {};
+  for (let i=0; i<ordered.length; i++){
+    const cat = ordered[i][0];
+    const val = ordered[i][1];
+    const prevVal = pc[cat] || 0;
+    if ((val - prevVal) >= fastThreshold) fastSet.add(cat);
+  }
+
+  for (let i=0; i<ordered.length; i++){
+    const cat = ordered[i][0];
+    const val = ordered[i][1];
+    const y = slotPositions[i];
+    const w = chart.xScale(val);
+
+    layer.appendChild(svgEl("rect", { x:0, y:y, width:w, height:chart.barHeight, fill: colorForCategory(cat) }));
+
+    const label = svgEl("text", {
+      x:-6, y:y + chart.barHeight/2, dy:"0.35em",
+      fill:"#eee", "font-size":"10", "text-anchor":"end"
+    });
+    const base = cleanText(cat);
+    label.textContent = (fastSet.has(cat) ? "↑ " : "") + truncateLabel(base, MAX_LABEL_CHARS);
+    if (fastSet.has(cat)) label.setAttribute("font-weight", "bold");
+    const title = svgEl("title");
+    title.textContent = base;
+    label.appendChild(title);
+    layer.appendChild(label);
+  }
+}
+
+function computeGlobalMax(framesCounts, minDisplay){
+  let maxVal = 0;
+  for (let i=0; i<framesCounts.length; i++){
+    const frame = framesCounts[i];
+    if (!frame) continue;
+    for (const k in frame){
+      const v = frame[k];
+      if (v != null && v >= minDisplay && v > maxVal) maxVal = v;
+    }
+  }
+  return maxVal;
+}
+
+function buildMetricTimeSeries(sortedRows, categoryFn, minCountFinal){
+  // Canonicalize category keys as strings everywhere.
+  // Prevents Set membership mismatches between numeric keys (e.g., 1968)
+  // and Object snapshot keys (always strings).
+  const finalCounts = new Map();
+  for (let i=0; i<sortedRows.length; i++){
+    const row = sortedRows[i];
+    const cats = categoryFn(row) || [];
+    for (let j=0; j<cats.length; j++){
+      const raw = cats[j];
+      const key = cleanText(String(raw));
+      if (!key) continue;
+      finalCounts.set(key, (finalCounts.get(key) || 0) + 1);
+    }
+  }
+
+  const allowed = new Set();
+  finalCounts.forEach((cnt, key) => { if (cnt >= minCountFinal) allowed.add(String(key)); });
+
+  const frames = [];
+  const currentCounts = new Map();
+  for (let i=0; i<sortedRows.length; i++){
+    const row = sortedRows[i];
+    const cats = categoryFn(row) || [];
+    for (let j=0; j<cats.length; j++){
+      const raw = cats[j];
+      const key = cleanText(String(raw));
+      if (!key) continue;
+      if (!allowed.has(key)) continue;
+      currentCounts.set(key, (currentCounts.get(key) || 0) + 1);
+    }
+    const snapshot = {};
+    currentCounts.forEach((v,k) => { snapshot[String(k)] = v; });
+    frames.push(snapshot);
+  }
+
+  return { frames, allowed };
+}
+
+/* ==========================================================
+   Player (on-demand, floating)
+   - Only create/reload iframe when Play is pressed
+   - While open, slider changes do NOT change the embed
+   ========================================================== */
+(function(){
   if (window.Race2Player) return;
 
-  // Player rate-limit hygiene:
-  // - We NEVER change/reload the embedded iframe on slider changes.
-  // - We only (re)create the iframe when the user presses Play.
-  // This prevents rapid scrolling from triggering repeated embed loads (429s).
-  var state = {
+  const state = {
     open: false,
-    // lastSong tracks the currently selected song (slider position)
-    lastSong: null,
-    // playingSong is the song whose embed is currently loaded/playing
-    playingSong: null
+    lastSelected: null,   // current slider-selected row
+    playingRow: null      // row loaded into iframe
   };
 
-  function pickProvider(media) {
+  function pickProvider(media){
     if (!media) return null;
 
-    var bc = media.bandcamp;
-    if (bc && (bc.status === "manual" || bc.status === "found") && bc.embed_src) {
-      return { key: "bandcamp", embed_src: bc.embed_src, height: 120 };
+    const bc = media.bandcamp;
+    if (bc && (bc.status === "manual" || bc.status === "found") && bc.embed_src){
+      return { key:"bandcamp", embed_src: cleanText(bc.embed_src), height:120 };
     }
-
-    var sp = media.spotify;
-    if (sp && sp.status === "found" && sp.embed_src) {
-      return { key: "spotify", embed_src: sp.embed_src, height: 152 };
+    const sp = media.spotify;
+    if (sp && sp.status === "found" && sp.embed_src){
+      return { key:"spotify", embed_src: cleanText(sp.embed_src), height:152 };
     }
-
-    var dz = media.deezer;
-    if (dz && dz.status === "found" && dz.embed_src) {
-      return { key: "deezer", embed_src: dz.embed_src, height: 200 };
+    const dz = media.deezer;
+    if (dz && dz.status === "found" && dz.embed_src){
+      return { key:"deezer", embed_src: cleanText(dz.embed_src), height:200 };
     }
-
     return null;
   }
 
-  function setFloatingTitle(row) {
-    var el = document.getElementById("floating-title");
+  function setFloatingTitle(row){
+    const el = document.getElementById("floating-title");
     if (!el) return;
-    var t = cleanLabelText((row && row.song) || "");
-    var a = cleanLabelText((row && row.artist) || "");
+    const t = cleanText((row && row.song) || "");
+    const a = cleanText((row && row.artist) || "");
     el.textContent = (t && a) ? (t + " — " + a) : "Now Playing";
   }
 
-  function setAttachedAvailability(row) {
-    var playBtn = document.getElementById("player-play-btn");
-    var msg = document.getElementById("player-unavailable-msg");
+  function setAttachedAvailability(row){
+    const playBtn = document.getElementById("player-play-btn");
+    const msg = document.getElementById("player-unavailable-msg");
     if (!playBtn || !msg) return;
 
-    var provider = pickProvider(row && row.media);
-    if (provider && provider.embed_src) {
+    const provider = pickProvider(row && row.media);
+    if (provider && provider.embed_src){
       playBtn.classList.remove("hidden");
       playBtn.disabled = false;
-      // If the currently selected song is the one already loaded in the floating
-      // player, reflect that state. (Crucially, we still don't reload embeds on
-      // slider changes; reload only happens when the user presses Play.)
-      playBtn.textContent = (state.open && state.playingSong === row) ? "Playing" : "Play";
+
+      // If the selected row is the one currently playing, reflect it; otherwise keep "Play".
+      const isPlayingSelected = state.open && state.playingRow && (state.playingRow === row);
+      playBtn.textContent = isPlayingSelected ? "Playing" : "Play";
+
       msg.classList.add("hidden");
       msg.textContent = "";
     } else {
@@ -578,466 +942,177 @@ var rankToFrameIndex = {};
     }
   }
 
-  function renderFloating(row) {
-    var embedEl = document.getElementById("floating-player-embed");
-    var linksEl = document.getElementById("floating-player-links");
-    if (!embedEl || !linksEl) return;
+  function renderFloatingLinks(row){
+    const linksEl = document.getElementById("floating-player-links");
+    if (!linksEl) return;
 
-    var provider = pickProvider(row && row.media);
-    if (provider && provider.embed_src) {
-      embedEl.innerHTML =
-        '<iframe loading="lazy"' +
-        ' src="' + provider.embed_src + '"' +
-        ' style="width:100%;height:' + provider.height + 'px;border:0;border-radius:10px;margin-top:10px"' +
-        ' allow="autoplay; encrypted-media; fullscreen; picture-in-picture"' +
-        ' referrerpolicy="no-referrer"></iframe>';
-    } else {
-      embedEl.innerHTML = '<div class="song-meta" style="margin-top:10px;color:#aaa;">No embedded player available.</div>';
-    }
-
-    var m = (row && row.media) ? row.media : {};
-    var links = [];
-    if (m.spotify && m.spotify.url)  links.push('<a href="' + m.spotify.url + '">Open in Spotify</a>');
-    if (m.deezer  && m.deezer.url)   links.push('<a href="' + m.deezer.url + '">Open in Deezer</a>');
-    if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + m.bandcamp.url + '">Support on Bandcamp</a>');
+    const m = (row && row.media) ? row.media : {};
+    const links = [];
+    if (m.spotify && m.spotify.url)  links.push('<a href="' + escapeHtml(cleanText(m.spotify.url)) + '">Open in Spotify</a>');
+    if (m.deezer  && m.deezer.url)   links.push('<a href="' + escapeHtml(cleanText(m.deezer.url)) + '">Open in Deezer</a>');
+    if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + escapeHtml(cleanText(m.bandcamp.url)) + '">Support on Bandcamp</a>');
     linksEl.innerHTML = links.join("");
   }
 
-  function open(row) {
-    var floating = document.getElementById("floating-player");
-    if (!floating) return;
-    state.open = true;
-    // Capture the song that is actually being played.
-    state.playingSong = row;
-    floating.classList.remove("hidden");
-    setFloatingTitle(state.playingSong);
-    renderFloating(state.playingSong);
+  function createIframeForRow(row){
+    const embedEl = document.getElementById("floating-player-embed");
+    if (!embedEl) return;
+
+    const provider = pickProvider(row && row.media);
+    if (provider && provider.embed_src){
+      embedEl.innerHTML =
+        '<iframe loading="lazy"' +
+        ' src="' + escapeHtml(provider.embed_src) + '"' +
+        ' style="height:' + String(provider.height) + 'px;"' +
+        ' allow="autoplay; encrypted-media; fullscreen; picture-in-picture"' +
+        ' referrerpolicy="no-referrer"></iframe>';
+    } else {
+      embedEl.innerHTML = '<div class="item-meta" style="margin-top:10px;color:#aaa;">No embedded player available.</div>';
+    }
   }
 
-  function close() {
-    var floating = document.getElementById("floating-player");
+  function openFloating(){
+    const floating = document.getElementById("floating-player");
+    if (!floating) return;
+    state.open = true;
+    floating.classList.remove("hidden");
+  }
+
+  function close(){
+    const floating = document.getElementById("floating-player");
     if (!floating) return;
     state.open = false;
     floating.classList.add("hidden");
-    var embedEl = document.getElementById("floating-player-embed");
+    const embedEl = document.getElementById("floating-player-embed");
     if (embedEl) embedEl.innerHTML = "";
-    // Stop playback and clear the loaded embed.
-    state.playingSong = null;
+    state.playingRow = null;
+
+    const playBtn = document.getElementById("player-play-btn");
+    if (playBtn) playBtn.textContent = "Play";
   }
 
-  function play() {
-    var row = state.lastSong;
-    var provider = pickProvider(row && row.media);
+  function play(){
+    const row = state.lastSelected;
+    const provider = pickProvider(row && row.media);
     if (!provider || !provider.embed_src) return;
-    open(row);
-    var playBtn = document.getElementById("player-play-btn");
+
+    // Lock in the row being played until the user presses Play again.
+    state.playingRow = row;
+
+    openFloating();
+    setFloatingTitle(state.playingRow);
+    createIframeForRow(state.playingRow);
+    renderFloatingLinks(state.playingRow);
+
+    const playBtn = document.getElementById("player-play-btn");
     if (playBtn) playBtn.textContent = "Playing";
   }
 
-  function update(row) {
-    state.lastSong = row;
+  function update(row){
+    state.lastSelected = row;
     setAttachedAvailability(row);
-    if (state.open) {
-      // While the player is open, keep the embed locked to the song that was
-      // playing when Play was pressed. Do not reload/recreate the iframe.
-      // (We *only* change the embed when the user presses Play again.)
-      setFloatingTitle(state.playingSong || row);
+
+    if (state.open){
+      // Update title to reflect the playing row (not the selected row).
+      setFloatingTitle(state.playingRow || row);
+      // IMPORTANT: do NOT recreate/reload iframe here.
     }
   }
 
-  window.Race2Player = { update: update, play: play, close: close };
+  window.Race2Player = { update, play, close };
 })();
 
-/* Wire player buttons (Safari compatible) */
+/* Wire player buttons */
 document.addEventListener("click", function(e){
   if (!e || !e.target) return;
-  if (e.target.id === "player-play-btn") {
-    if (window.Race2Player && typeof window.Race2Player.play === "function") window.Race2Player.play();
+  if (e.target.id === "player-play-btn"){
+    window.Race2Player && window.Race2Player.play && window.Race2Player.play();
   }
-  if (e.target.id === "player-close-btn") {
-    if (window.Race2Player && typeof window.Race2Player.close === "function") window.Race2Player.close();
-    var playBtn = document.getElementById("player-play-btn");
-    if (playBtn) playBtn.textContent = "Play";
+  if (e.target.id === "player-close-btn"){
+    window.Race2Player && window.Race2Player.close && window.Race2Player.close();
   }
 });
 
-/* ===================== Helpers ===================== */
-function truncateLabel(label, maxLen) {
-  if (!label) return "";
-  const s = String(label);
-  if (s.length <= maxLen) return s;
-  if (maxLen <= 1) return s.slice(0, maxLen);
-  return s.slice(0, maxLen - 1) + "…";
-}
-
-function cleanLabelText(s) {
-  return String(s || "").replace(/\\'/g, "'");
-}
-
-function renderUpcomingFromCurrent(currentRank) {
-  if (!recentSongsBody) return;
-
-  var rows = [];
-  var cr = Number(currentRank || 0);
-  if (!cr || isNaN(cr)) { recentSongsBody.innerHTML = ""; return; }
-  if (cr >= 885) { recentSongsBody.innerHTML = ""; return; }
-
-  var start = cr;
-  var end = Math.min(885, cr + 9);
-
-  for (var r = start; r <= end; r++) {
-    var row = rankToRow[r];
-    if (row) rows.push(row);
-  }
-
-  var htmlRows = [];
-  for (var i=0; i<rows.length; i++) {
-    var rr = rows[i];
-    var rank = (rr.rank != null) ? String(rr.rank) : "";
-    var song = rr.song ? cleanLabelText(rr.song) : "";
-    var artist = rr.artist ? cleanLabelText(rr.artist) : "";
-    var orig = rr.originalArtist ? cleanLabelText(rr.originalArtist) : "";
-    htmlRows.push("<tr data-rank=\"" + rank + "\"><td>" + rank + "</td><td>" + song + "</td><td>" + artist + "</td><td>" + orig + "</td></tr>");
-  }
-  recentSongsBody.innerHTML = htmlRows.join("");
-}
-
-/* ===================== Main app state ===================== */
-var initialized = false;
-var sortedSongs = [];
-var frameRanks = [];
-var metrics = [];
-var metricState = {};
-var currentFrameIndex = 0;
-
-function parseYearFromString(value) {
-  if (value === null || value === undefined) return null;
-  var m = String(value).match(/\b(18|19|20)\d{2}\b/);
-  if (!m) return null;
-  var year = parseInt(m[0], 10);
-  if (isNaN(year) || year < 1800 || year > 2100) return null;
-  return year;
-}
-function computeDecade(year) {
-  if (year === null || year === undefined || isNaN(year)) return null;
-  var y = parseInt(year, 10);
-  return (Math.floor(y / 10) * 10) + "s";
-}
-function parsePhpGenre(value) {
-  var s = String(value || "").trim();
-  if (!s) return [];
-  if (s.indexOf("a:") !== 0) return [];
-  var regex = /s:\d+:"(.*?)"/g;
-  var out = [];
-  var m;
-  while ((m = regex.exec(s)) !== null) out.push(m[1]);
-  return out.map(function(x){ return String(x || "").trim(); }).filter(Boolean);
-}
-function parseGenreList(value) {
-  var s = String(value || "").trim();
-  if (!s) return [];
-  var php = parsePhpGenre(s);
-  if (php.length) return php;
-  return [s];
-}
-
-const COLOR_PALETTE = [
-  "#4e79a7","#f28e2b","#e15759","#76b7b2","#59a14f",
-  "#edc948","#b07aa1","#ff9da7","#9c755f","#bab0ab",
-  "#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3",
-  "#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd",
-  "#ccebc5","#ffed6f"
-];
-
-function hashString(str) {
-  var s = String(str || "");
-  var h = 2166136261;
-  for (var i=0; i<s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0);
-}
-function colorForCategory(cat) {
-  var idx = hashString(cat) % COLOR_PALETTE.length;
-  return COLOR_PALETTE[idx];
-}
-function chooseTickStep(maxVal) {
-  if (maxVal <= 20) return 2;
-  if (maxVal <= 50) return 5;
-  if (maxVal <= 250) return 25;
-  if (maxVal <= 500) return 50;
-  return 100;
-}
-
-function clearSvg(svg) {
-  while (svg.firstChild) svg.removeChild(svg.firstChild);
-}
-function svgEl(tag, attrs) {
-  var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  if (attrs) {
-    Object.keys(attrs).forEach(function(k){ el.setAttribute(k, String(attrs[k])); });
-  }
-  return el;
-}
-
-function setupChart(svgElement, topN, globalMax, allowedSet) {
-  var svg = svgElement;
-  clearSvg(svg);
-
-  var width = svg.clientWidth || 400;
-  var height = svg.clientHeight || 240;
-
-  var marginLeft;
-  if (width <= 360) marginLeft = 90;
-  else if (width <= 420) marginLeft = 105;
-  else if (width <= 500) marginLeft = 115;
-  else if (width <= 900) marginLeft = 150;
-  else marginLeft = 165;
-
-  var margin = { top: 4, right: 8, bottom: 18, left: marginLeft };
-  var innerWidth = Math.max(10, width - margin.left - margin.right);
-  var innerHeight = Math.max(10, height - margin.top - margin.bottom);
-
-  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-
-  var g = svgEl("g", { transform: "translate(" + margin.left + "," + margin.top + ")" });
-  svg.appendChild(g);
-
-  var maxVal = Math.max(globalMax || 2, 2);
-  var step = chooseTickStep(maxVal);
-  var xMaxRounded = Math.ceil(maxVal / step) * step;
-
-  function xScale(v) {
-    var vv = Math.max(0, Math.min(xMaxRounded, Number(v) || 0));
-    return (vv / xMaxRounded) * innerWidth;
-  }
-
-  for (var t = 0; t <= xMaxRounded; t += step) {
-    var x = xScale(t);
-    var line = svgEl("line", {
-      x1: x, y1: 0, x2: x, y2: innerHeight,
-      stroke: "#333",
-      "stroke-dasharray": "2,2"
-    });
-    g.appendChild(line);
-
-    var tick = svgEl("text", {
-      x: x, y: innerHeight + 14,
-      fill: "#ccc",
-      "font-size": "9",
-      "text-anchor": "middle"
-    });
-    tick.textContent = String(t);
-    g.appendChild(tick);
-  }
-
-  var slotHeight = innerHeight / topN;
-  var barHeight = slotHeight * BAR_HEIGHT_FACTOR;
-
-  return {
-    svg: svg, g: g, innerWidth: innerWidth, innerHeight: innerHeight, xScale: xScale,
-    slotHeight: slotHeight, barHeight: barHeight, topN: topN,
-    allowed: allowedSet
-  };
-}
-
-function updateChart(chart, frameCounts, prevFrameCounts, options) {
-  var g = chart.g;
-  var oldLayer = chart._layer;
-  if (oldLayer && oldLayer.parentNode) oldLayer.parentNode.removeChild(oldLayer);
-  var layer = svgEl("g");
-  chart._layer = layer;
-  g.appendChild(layer);
-
-  var minDisplay = options.minDisplayCount;
-  var fastThreshold = options.fastRiserThreshold;
-
-  var entries = [];
-  var fc = frameCounts || {};
-  for (var k in fc) {
-    var cat = k;
-    var cnt = fc[k];
-    if (!chart.allowed.has(cat)) continue;
-    if (cnt == null || cnt < minDisplay) continue;
-    entries.push([cat, cnt]);
-  }
-
-  entries.sort(function(a,b){
-    return (b[1] - a[1]) || String(a[0]).localeCompare(String(b[0]));
-  });
-
-  var ordered = entries.slice(0, chart.topN);
-  var count = ordered.length;
-  if (!count) return;
-
-  var startSlot = chart.topN - count;
-  var slotPositions = [];
-  for (var i=0; i<count; i++) {
-    var slotIndex = startSlot + i;
-    slotPositions.push(slotIndex * chart.slotHeight + (chart.slotHeight - chart.barHeight) / 2);
-  }
-
-  var fastSet = new Set();
-  var pc = prevFrameCounts || {};
-  for (var j=0; j<ordered.length; j++) {
-    var cat2 = ordered[j][0];
-    var val2 = ordered[j][1];
-    var prevVal = pc[cat2] || 0;
-    if ((val2 - prevVal) >= fastThreshold) fastSet.add(cat2);
-  }
-
-  for (var n=0; n<ordered.length; n++) {
-    var cat3 = ordered[n][0];
-    var val3 = ordered[n][1];
-    var y = slotPositions[n];
-    var w = chart.xScale(val3);
-
-    var rect = svgEl("rect", { x: 0, y: y, width: w, height: chart.barHeight, fill: colorForCategory(cat3) });
-    layer.appendChild(rect);
-
-    var label = svgEl("text", {
-      x: -6,
-      y: y + chart.barHeight / 2,
-      dy: "0.35em",
-      fill: "#eee",
-      "font-size": "10",
-      "text-anchor": "end"
-    });
-
-    var base = String(cat3 || "");
-    label.textContent = (fastSet.has(cat3) ? "↑ " : "") + truncateLabel(base, MAX_LABEL_CHARS);
-    if (fastSet.has(cat3)) label.setAttribute("font-weight", "bold");
-
-    var title = svgEl("title");
-    title.textContent = base;
-    label.appendChild(title);
-
-    layer.appendChild(label);
-  }
-}
-
-function computeGlobalMax(framesCounts, minDisplay) {
-  var maxVal = 0;
-  for (var i=0; i<framesCounts.length; i++) {
-    var frame = framesCounts[i];
-    if (!frame) continue;
-    for (var k in frame) {
-      var v = frame[k];
-      if (v != null && v >= minDisplay && v > maxVal) maxVal = v;
-    }
-  }
-  return maxVal;
-}
-
-function buildMetricTimeSeries(sortedRows, categoryFn, minCountFinal) {
-  var finalCounts = new Map();
-  for (var i=0; i<sortedRows.length; i++) {
-    var row = sortedRows[i];
-    var cats = categoryFn(row) || [];
-    for (var j=0; j<cats.length; j++) {
-      var cat = cats[j];
-      if (cat === null || cat === undefined || String(cat).trim() === "") continue;
-      var key = String(cat);
-      finalCounts.set(key, (finalCounts.get(key) || 0) + 1);
-    }
-  }
-
-  var allowed = new Set();
-  finalCounts.forEach(function(cnt, key){
-    if (cnt >= minCountFinal) allowed.add(key);
-  });
-
-  var frames = [];
-  var currentCounts = new Map();
-
-  for (var k=0; k<sortedRows.length; k++) {
-    var row2 = sortedRows[k];
-    var cats2 = categoryFn(row2) || [];
-    for (var m=0; m<cats2.length; m++) {
-      var key2 = String(cats2[m]);
-      if (!allowed.has(key2)) continue;
-      currentCounts.set(key2, (currentCounts.get(key2) || 0) + 1);
-    }
-    var snapshot = {};
-    currentCounts.forEach(function(v2, kk){ snapshot[kk] = v2; });
-    frames.push(snapshot);
-  }
-
-  return { frames: frames, allowed: allowed };
-}
-
-/* ===================== UI toggles / DnD ===================== */
-function setCollapsed(cell, collapsed) {
-  var btn = cell.querySelector(".cell-toggle");
-  var body = cell.querySelector(".cell-body");
+/* ==========================================================
+   Panel collapse, DnD, responsive device classes
+   ========================================================== */
+function setCollapsed(panel, collapsed){
+  const btn = panel.querySelector(".panel-toggle");
+  const body = panel.querySelector(".panel-body");
   if (!btn || !body) return;
 
-  if (collapsed) {
+  if (collapsed){
     body.style.display = "none";
-    cell.classList.add("is-collapsed");
-    cell.classList.remove("is-expanded");
+    panel.classList.add("is-collapsed");
+    panel.classList.remove("is-expanded");
     btn.textContent = "Show";
   } else {
     body.style.display = "";
-    cell.classList.remove("is-collapsed");
-    cell.classList.add("is-expanded");
+    panel.classList.remove("is-collapsed");
+    panel.classList.add("is-expanded");
     btn.textContent = "Hide";
   }
 }
-
-function initCellToggles() {
-  document.querySelectorAll(".cell").forEach(function(cell){
-    var btn = cell.querySelector(".cell-toggle");
-    var body = cell.querySelector(".cell-body");
+function initPanelToggles(){
+  document.querySelectorAll(".panel").forEach(panel => {
+    const btn = panel.querySelector(".panel-toggle");
+    const body = panel.querySelector(".panel-body");
     if (!btn || !body) return;
 
-    cell.classList.add("is-expanded");
-    cell.classList.remove("is-collapsed");
+    panel.classList.add("is-expanded");
+    panel.classList.remove("is-collapsed");
 
-    btn.addEventListener("click", function(){
-      var currentlyHidden = (body.style.display === "none");
-      setCollapsed(cell, !currentlyHidden);
+    btn.addEventListener("click", () => {
+      const currentlyHidden = (body.style.display === "none");
+      setCollapsed(panel, !currentlyHidden);
       if (initialized) rebuildChartsAndRedraw();
     });
   });
 }
-
-function initDragAndDrop() {
-  var dashboard = document.getElementById("dashboard");
-  var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+function initDragAndDrop(){
+  const dashboard = document.getElementById("dashboard");
+  const finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
   if (!finePointer) return;
 
-  var dragSrcEl = null;
+  let dragSrcEl = null;
+  dashboard.querySelectorAll(".panel.is-draggable").forEach(panel => {
+    panel.setAttribute("draggable", "true");
 
-  dashboard.querySelectorAll(".draggable-cell").forEach(function(cell){
-    cell.setAttribute("draggable", "true");
-
-    cell.addEventListener("dragstart", function(e){
-      dragSrcEl = cell;
+    panel.addEventListener("dragstart", e => {
+      dragSrcEl = panel;
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", "");
-      cell.classList.add("dragging");
+      panel.classList.add("dragging");
     });
 
-    cell.addEventListener("dragend", function(){ cell.classList.remove("dragging"); });
+    panel.addEventListener("dragend", () => panel.classList.remove("dragging"));
 
-    cell.addEventListener("dragover", function(e){
+    panel.addEventListener("dragover", e => {
       e.preventDefault();
-      if (!dragSrcEl || dragSrcEl === cell) return;
+      if (!dragSrcEl || dragSrcEl === panel) return;
 
-      var rect = cell.getBoundingClientRect();
-      var offset = e.clientY - rect.top;
-      var midpoint = rect.height / 2;
-      if (offset > midpoint) dashboard.insertBefore(dragSrcEl, cell.nextSibling);
-      else dashboard.insertBefore(dragSrcEl, cell);
+      const rect = panel.getBoundingClientRect();
+      const offset = e.clientY - rect.top;
+      const midpoint = rect.height / 2;
+      if (offset > midpoint) dashboard.insertBefore(dragSrcEl, panel.nextSibling);
+      else dashboard.insertBefore(dragSrcEl, panel);
     });
   });
 }
 
-function initKeyboardStepping() {
-  window.addEventListener("keydown", function(e){
-    var tag = (document.activeElement && document.activeElement.tagName) || "";
+function stepSlider(delta){
+  const min = Number(frameSlider.min);
+  const max = Number(frameSlider.max);
+  const cur = Number(frameSlider.value) || 0;
+  const next = Math.max(min, Math.min(max, cur + delta));
+  if (next !== cur){
+    frameSlider.value = String(next);
+    frameSlider.dispatchEvent(new Event("input"));
+  }
+}
+function initKeyboardStepping(){
+  window.addEventListener("keydown", (e) => {
+    const tag = (document.activeElement && document.activeElement.tagName) || "";
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
     if (e.key === "ArrowLeft") stepSlider(-1);
@@ -1046,128 +1121,194 @@ function initKeyboardStepping() {
     if (e.key === "PageDown") stepSlider(10);
   });
 }
-
-function initSwipeStepping() {
-  var touchStartX = null;
-
-  document.addEventListener("touchstart", function(e){
+function initSwipeStepping(){
+  let touchStartX = null;
+  document.addEventListener("touchstart", (e) => {
     if (!e.touches || !e.touches.length) return;
     touchStartX = e.touches[0].clientX;
-  }, { passive: true });
+  }, { passive:true });
 
-  document.addEventListener("touchend", function(e){
+  document.addEventListener("touchend", (e) => {
     if (touchStartX === null) return;
-    var endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : null;
+    const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : null;
     if (endX === null) return;
 
-    var dx = endX - touchStartX;
+    const dx = endX - touchStartX;
     touchStartX = null;
 
     if (Math.abs(dx) < 40) return;
     if (dx > 0) stepSlider(-1);
     else stepSlider(1);
-  }, { passive: true });
+  }, { passive:true });
 }
-
-function initResizeHandler() {
-  var t = null;
-  window.addEventListener("resize", function(){
+function initResizeHandler(){
+  let t = null;
+  window.addEventListener("resize", () => {
     if (!initialized) return;
     clearTimeout(t);
-    t = setTimeout(function(){ rebuildChartsAndRedraw(); }, 80);
+    t = setTimeout(() => rebuildChartsAndRedraw(), 80);
   });
 }
 
-function stepSlider(delta) {
-  var min = Number(frameSlider.min);
-  var max = Number(frameSlider.max);
-  var cur = Number(frameSlider.value) || 0;
-  var next = Math.max(min, Math.min(max, cur + delta));
-  if (next !== cur) {
-    frameSlider.value = String(next);
-    frameSlider.dispatchEvent(new Event("input"));
+function applyResponsiveDeviceClass(){
+  const w = window.innerWidth || 9999;
+  const h = window.innerHeight || 9999;
+  const minSide = Math.min(w, h);
+  document.body.classList.toggle("is-phone", (minSide <= 520));
+  document.body.classList.toggle("is-landscape", (w > h));
+}
+
+function applyMobileDefaults(){
+  const w = window.innerWidth || 9999;
+  if (w > 650) return;
+
+  const show = { "panel-current-item": true, "panel-next-items": true };
+  document.querySelectorAll(".panel").forEach(panel => {
+    if (!panel.id) return;
+    setCollapsed(panel, !show[panel.id]);
+  });
+}
+
+/* ==========================================================
+   Metric slot wiring (max 9 slots)
+   ========================================================== */
+function getChartSlots(){
+  return Array.from(document.querySelectorAll('[data-panel="chart-slot"]'));
+}
+
+function bindMetricsToSlots(metricList){
+  const slots = getChartSlots();
+  // First hide all slots
+  for (let i=0; i<slots.length; i++){
+    const slot = slots[i];
+    slot.classList.add("hidden");
+    slot.dataset.metric = "";
+    const titleEl = slot.querySelector(".panel-title");
+    const svg = slot.querySelector("svg.chart");
+    if (titleEl) titleEl.textContent = "Chart";
+    if (svg) { clearSvg(svg); }
+  }
+
+  // Then assign metrics to available slots
+  for (let i=0; i<metricList.length && i<slots.length; i++){
+    const slot = slots[i];
+    const metric = metricList[i];
+    slot.classList.remove("hidden");
+    slot.dataset.metric = metric.key;
+
+    const titleEl = slot.querySelector(".panel-title");
+    if (titleEl) titleEl.textContent = metric.title;
+
+    // Ensure SVG has a stable ID for this metric key
+    const svg = slot.querySelector("svg.chart");
+    if (svg) svg.id = "chart-" + metric.key;
   }
 }
 
-function rebuildChartsAndRedraw() {
-  for (var i=0; i<metrics.length; i++) {
-    var metric = metrics[i];
-    var state = metricState[metric.id];
-    var svgEl2 = document.getElementById(metric.svgId);
-    if (!state || !svgEl2) continue;
-    state.chart = setupChart(svgEl2, metric.topN, state.globalMax, state.allowed);
-  }
-  updateDashboard(currentFrameIndex);
-}
-
-/* ===================== Init + data load ===================== */
-async function init() {
-  initCellToggles();
+/* ==========================================================
+   Main
+   ========================================================== */
+async function init(){
+  initPanelToggles();
   initDragAndDrop();
   initKeyboardStepping();
   initSwipeStepping();
   initResizeHandler();
 
-  try {
+  applyResponsiveDeviceClass();
+  applyMobileDefaults();
+
+  try{
     const resp = await fetch(DATA_ENDPOINT);
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if (!Array.isArray(data)) throw new Error("Data endpoint must return an array");
 
     const raw = data.map(d => ({ ...d }));
 
     raw.forEach(row => {
-      row.rank = (row.rank != null) ? Number(row.rank) : null;
-      row.song = String(row.song || "").trim();
-      row.artist = String(row.artist || "").trim();
-      row.album = String(row.album || "").trim();
-      row.albumArt = String(row.albumArt || "").trim();
-      row.originalArtist = String(row.originalArtist || "").trim();
-      row.originalYear = row.originalYear;
-      row.releaseDate = row.releaseDate;
+      row.id = row.id != null ? cleanText(row.id) : row.id;
+      row.artist = cleanText(row.artist);
+      row.song = cleanText(row.song);
+      row.album = cleanText(row.album);
+      row.releaseDate = cleanText(row.releaseDate);
+      row.albumArt = cleanText(row.albumArt);
+      row.originalArtist = cleanText(row.originalArtist);
+      row.originalYear = cleanText(row.originalYear);
+      row.genre = (row.genre == null ? null : String(row.genre));
+
+      row.rank = row.rank != null ? Number(row.rank) : null;
+
       row.genre_list = parseGenreList(row.genre);
       row.originalYear_parsed = parseYearFromString(row.originalYear);
       row.coverYear_parsed = parseYearFromString(row.releaseDate);
       row.originalDecade = computeDecade(row.originalYear_parsed);
-      row.originalSongCombo = (row.song && row.originalArtist) ? (row.song + " — " + row.originalArtist) : null;
+
+      const song = row.song || null;
+      const oa = row.originalArtist || null;
+      row.originalSongCombo = (song && oa) ? `${song} — ${oa}` : null;
+
+    // One-time sanity checks (safe to keep; helps diagnose empty charts)
+    try{
+      let cCover=0, cOrig=0, cOrigDec=0;
+      for (let i=0; i<raw.length; i++){
+        if (raw[i].coverYear_parsed != null) cCover++;
+        if (raw[i].originalYear_parsed != null) cOrig++;
+        if (raw[i].originalDecade != null) cOrigDec++;
+      }
+      console.info("[Race2] Parsed coverYear:", cCover, "origYear:", cOrig, "origDecade:", cOrigDec, "of", raw.length);
+      if (cCover === 0 || cOrig === 0){
+        const sample = raw.slice(0, 8).map(r => ({rank:r.rank, releaseDate:r.releaseDate, originalYear:r.originalYear}));
+        console.info("[Race2] Year samples:", sample);
+      }
+    } catch(e) { /* ignore */ }
+
     });
 
     const filtered = raw.filter(row => row.rank != null && !isNaN(row.rank));
-
-    if (!filtered.length) {
+    if (!filtered.length){
       frameLabel.textContent = "0";
       return;
     }
 
+    // Rank descending: 885 -> 1
     sortedSongs = filtered.slice().sort((a,b) => (b.rank - a.rank));
     frameRanks = sortedSongs.map(r => r.rank);
 
     rankToRow = {};
     rankToFrameIndex = {};
-    for (let i=0; i<sortedSongs.length; i++) {
+    for (let i=0; i<sortedSongs.length; i++){
       const r = sortedSongs[i];
-      rankToRow[r.rank] = r;
-      rankToFrameIndex[r.rank] = i;
+      const rk = Number(r.rank);
+      rankToRow[rk] = r;
+      rankToFrameIndex[rk] = i;
     }
 
-    metrics = [
-      { id:"origArtists", svgId:"chart-orig-artists", categoryFn: row => row.originalArtist ? [String(row.originalArtist)] : [], minFinal: MIN_COUNT_ORIG_ARTIST, topN: TOP_N_ARTISTS },
-      { id:"coverArtists", svgId:"chart-cover-artists", categoryFn: row => row.artist ? [String(row.artist)] : [], minFinal: MIN_COUNT_COVER_ARTIST, topN: TOP_N_ARTISTS },
-      { id:"origYears", svgId:"chart-orig-years", categoryFn: row => row.originalYear_parsed ? [String(row.originalYear_parsed)] : [], minFinal: MIN_COUNT_ORIG_YEAR, topN: TOP_N_YEARS },
-      { id:"origDecades", svgId:"chart-orig-decades", categoryFn: row => row.originalDecade ? [String(row.originalDecade)] : [], minFinal: MIN_COUNT_DECADE, topN: TOP_N_DECADES },
-      { id:"coverYears", svgId:"chart-cover-years", categoryFn: row => row.coverYear_parsed ? [String(row.coverYear_parsed)] : [], minFinal: MIN_COUNT_COVER_YEAR, topN: TOP_N_YEARS },
-      { id:"origSongs", svgId:"chart-orig-songs", categoryFn: row => row.originalSongCombo ? [String(row.originalSongCombo)] : [], minFinal: MIN_COUNT_ORIG_SONG, topN: TOP_N_ORIG_SONGS },
-      { id:"genres", svgId:"chart-genres", categoryFn: row => row.genre_list || [], minFinal: MIN_COUNT_GENRE, topN: TOP_N_GENRES }
+    // Cover-mode metric set (bind to slots)
+    const coverMetrics = [
+      { key:"orig_artists", title:"Most Covered Original Artists", topN: TOP_N_DEFAULT, minFinal: 2, categoryFn: row => row.originalArtist ? [String(row.originalArtist)] : [] },
+      { key:"cover_artists", title:"Most Frequent Cover Artists", topN: TOP_N_DEFAULT, minFinal: 2, categoryFn: row => row.artist ? [String(row.artist)] : [] },
+      { key:"orig_years", title:"Most Covered Original Years", topN: TOP_N_YEARS, minFinal: 2, categoryFn: row => row.originalYear_parsed ? [String(row.originalYear_parsed)] : [] },
+      { key:"orig_decades", title:"Most Covered Original Decades", topN: TOP_N_DECADES, minFinal: 2, categoryFn: row => row.originalDecade ? [String(row.originalDecade)] : [] },
+      { key:"cover_years", title:"Most Frequent Cover Years", topN: TOP_N_YEARS, minFinal: 2, categoryFn: row => row.coverYear_parsed ? [String(row.coverYear_parsed)] : [] },
+      { key:"orig_songs", title:"Most Covered Original Songs", topN: TOP_N_ORIG_SONGS, minFinal: 2, categoryFn: row => row.originalSongCombo ? [String(row.originalSongCombo)] : [] },
+      { key:"genres", title:"Most Represented Genres", topN: TOP_N_GENRES, minFinal: 3, categoryFn: row => row.genre_list || [] }
     ];
 
+    bindMetricsToSlots(coverMetrics);
+
+    metrics = coverMetrics;
+
     metricState = {};
-    for (let i=0; i<metrics.length; i++) {
+    for (let i=0; i<metrics.length; i++){
       const metric = metrics[i];
       const built = buildMetricTimeSeries(sortedSongs, metric.categoryFn, metric.minFinal);
       const globalMax = computeGlobalMax(built.frames, MIN_DISPLAY_COUNT);
-      const svgEl2 = document.getElementById(metric.svgId);
-      const chart = svgEl2 ? setupChart(svgEl2, metric.topN, globalMax, built.allowed) : null;
-      metricState[metric.id] = { frames: built.frames, allowed: built.allowed, globalMax: globalMax, chart: chart };
+
+      const svgEl = document.getElementById("chart-" + metric.key);
+      const chart = svgEl ? setupChart(svgEl, metric.topN, globalMax, built.allowed) : null;
+
+      metricState[metric.key] = { frames: built.frames, allowed: built.allowed, globalMax, chart };
     }
 
     const numFrames = sortedSongs.length;
@@ -1181,30 +1322,42 @@ async function init() {
       updateDashboard(idx);
     });
 
-    if (recentSongsBody) {
-      recentSongsBody.addEventListener("click", function(ev) {
-        var tr = ev.target && ev.target.closest ? ev.target.closest("tr") : null;
+    // Clickable next-items rows
+    if (recentSongsBody){
+      recentSongsBody.addEventListener("click", function(ev){
+        const tr = ev.target && ev.target.closest ? ev.target.closest("tr") : null;
         if (!tr) return;
-        var r = Number(tr.getAttribute("data-rank") || 0);
+        const r = Number(tr.getAttribute("data-rank") || 0);
         if (!r || isNaN(r)) return;
-        var idx2 = (rankToFrameIndex && (r in rankToFrameIndex)) ? rankToFrameIndex[r] : null;
-        if (idx2 === null || idx2 === undefined) return;
+        const idx2 = (r in rankToFrameIndex) ? rankToFrameIndex[r] : null;
+        if (idx2 == null) return;
         frameSlider.value = String(idx2);
         updateDashboard(idx2);
       });
     }
 
     initialized = true;
-    updateDashboard(0);
+    updateDashboard(currentFrameIndex);
 
-  } catch (err) {
+  } catch(err){
     console.error(err);
     frameLabel.textContent = "0";
     currentSongTitle.textContent = "Failed to load data";
   }
 }
 
-function updateDashboard(frameIndex) {
+function rebuildChartsAndRedraw(){
+  for (let i=0; i<metrics.length; i++){
+    const metric = metrics[i];
+    const state = metricState[metric.key];
+    const svgEl = document.getElementById("chart-" + metric.key);
+    if (!state || !svgEl) continue;
+    state.chart = setupChart(svgEl, metric.topN, state.globalMax, state.allowed);
+  }
+  updateDashboard(currentFrameIndex);
+}
+
+function updateDashboard(frameIndex){
   if (!sortedSongs.length) return;
 
   const numFrames = sortedSongs.length;
@@ -1213,9 +1366,10 @@ function updateDashboard(frameIndex) {
   const rank = frameRanks[currentFrameIndex];
   frameLabel.textContent = rank != null ? String(rank) : "";
 
-  for (let i=0; i<metrics.length; i++) {
+  // Charts
+  for (let i=0; i<metrics.length; i++){
     const metric = metrics[i];
-    const state = metricState[metric.id];
+    const state = metricState[metric.key];
     if (!state || !state.chart) continue;
 
     const frameCounts = state.frames[currentFrameIndex] || {};
@@ -1225,45 +1379,51 @@ function updateDashboard(frameIndex) {
     updateChart(state.chart, frameCounts, prevCounts, { minDisplayCount: MIN_DISPLAY_COUNT, fastRiserThreshold: FAST_RISER_THRESHOLD });
   }
 
+  // Current item panel
   const row = sortedSongs[currentFrameIndex];
-  const imgUrl = String(row.albumArt || "").trim();
-
-  if (imgUrl) {
+  const imgUrl = cleanText(row.albumArt || "");
+  if (imgUrl){
     currentAlbumArt.classList.remove("no-art");
     currentAlbumArt.src = imgUrl;
-    currentAlbumArt.alt = (row.song || "") + " – " + (row.artist || "");
+    currentAlbumArt.alt = `${cleanText(row.song || "")} – ${cleanText(row.artist || "")}`;
   } else {
     currentAlbumArt.classList.add("no-art");
     currentAlbumArt.removeAttribute("src");
     currentAlbumArt.alt = "";
   }
 
-  const title = row.song || "(Unknown song)";
-  const artist = row.artist || "(Unknown cover artist)";
-  const origArtist = row.originalArtist || "(Unknown original artist)";
+  const title = cleanText(row.song || "(Unknown song)");
+  const artist = cleanText(row.artist || "(Unknown cover artist)");
+  const origArtist = cleanText(row.originalArtist || "(Unknown original artist)");
   const origYear = row.originalYear_parsed ? String(row.originalYear_parsed) : "Unknown";
   const coverYear = row.coverYear_parsed ? String(row.coverYear_parsed) : "Unknown";
 
   currentSongTitle.textContent = title;
-  currentSongArtist.textContent = artist + " (covering " + origArtist + ")";
-  currentSongMeta.textContent = "Rank " + row.rank + " · Original year: " + origYear + " · Cover year: " + coverYear;
+  currentSongArtist.textContent = `${artist} (covering ${origArtist})`;
+  currentSongMeta.textContent = `Rank ${row.rank} · Original year: ${origYear} · Cover year: ${coverYear}`;
 
+  // Next 10
   renderUpcomingFromCurrent(row.rank);
 
+  // Current links (same-tab)
   const linksEl = document.getElementById("current-player-links");
-  if (linksEl) {
+  if (linksEl){
     const m = row.media || {};
     const links = [];
-    if (m.spotify && m.spotify.url)  links.push('<a href="' + m.spotify.url + '">Spotify</a>');
-    if (m.deezer  && m.deezer.url)   links.push('<a href="' + m.deezer.url + '">Deezer</a>');
-    if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + m.bandcamp.url + '">Bandcamp</a>');
+    if (m.spotify && m.spotify.url)  links.push('<a href="' + escapeHtml(cleanText(m.spotify.url)) + '">Spotify</a>');
+    if (m.deezer  && m.deezer.url)   links.push('<a href="' + escapeHtml(cleanText(m.deezer.url)) + '">Deezer</a>');
+    if (m.bandcamp && m.bandcamp.url) links.push('<a href="' + escapeHtml(cleanText(m.bandcamp.url)) + '">Bandcamp</a>');
     linksEl.innerHTML = links.join("");
   }
 
-  if (window.Race2Player && typeof window.Race2Player.update === "function") window.Race2Player.update(row);
+  // Player UI update only (no iframe reload)
+  window.Race2Player && window.Race2Player.update && window.Race2Player.update(row);
 }
 
+/* Boot */
 window.addEventListener("load", init);
+window.addEventListener("load", applyResponsiveDeviceClass);
+window.addEventListener("resize", applyResponsiveDeviceClass);
 </script>
 </body>
 </html>
