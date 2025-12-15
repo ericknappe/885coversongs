@@ -4,7 +4,106 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WXPN 885 Greatest Cover Songs – Countdown Dashboard</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js">
+// ----------------------------- Phone-friendly jump menu + About -----------------------------
+(function initFabAndModals(){
+  const dashboard = document.getElementById("dashboard");
+  const modalPanel = document.getElementById("panel-picker-modal");
+  const modalAbout = document.getElementById("about-modal");
+  const list = document.getElementById("panel-picker-list");
+
+  function openModal(el){
+    if (!el) return;
+    el.hidden = false;
+    document.body.classList.add("modal-open");
+  }
+  function closeModal(el){
+    if (!el) return;
+    el.hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+
+  // Click backdrop to close
+  [modalPanel, modalAbout].forEach(m => {
+    if (!m) return;
+    m.addEventListener("click", (e) => {
+      if (e.target === m) closeModal(m);
+    });
+  });
+
+  // Close buttons
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest && e.target.closest("[data-modal-close]");
+    if (!btn) return;
+    const id = btn.getAttribute("data-modal-close");
+    closeModal(document.getElementById(id));
+  });
+
+  // ESC closes
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(modalPanel);
+      closeModal(modalAbout);
+    }
+  });
+
+  // Build panel list from visible cells
+  function buildPanelList(){
+    if (!dashboard || !list) return;
+    list.innerHTML = "";
+    const cells = Array.from(dashboard.querySelectorAll(".cell"));
+    cells.forEach(cell => {
+      const titleEl = cell.querySelector(".cell-title");
+      const title = titleEl ? titleEl.textContent.trim() : (cell.id || "Panel");
+      // Skip if no id
+      if (!cell.id) return;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "panel-picker-btn";
+      btn.innerHTML = `<span>${escapeHtml(title)}</span><span class="pp-sub">Jump</span>`;
+      btn.addEventListener("click", () => {
+        // Expand the panel if it's collapsed
+        cell.classList.remove("is-collapsed");
+        // If your code toggles via button text, keep it in sync where possible
+        const toggle = cell.querySelector(".cell-toggle");
+        if (toggle) toggle.textContent = "Hide";
+        closeModal(modalPanel);
+
+        // Scroll with a bit of top padding
+        const y = cell.getBoundingClientRect().top + window.scrollY - 12;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      });
+      list.appendChild(btn);
+    });
+  }
+
+  // Basic HTML escape for injected title text
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // FAB handlers
+  const fabPanels = document.getElementById("fab-panels");
+  const fabAbout = document.getElementById("fab-about");
+
+  if (fabPanels) {
+    fabPanels.addEventListener("click", () => {
+      buildPanelList();
+      openModal(modalPanel);
+    });
+  }
+  if (fabAbout) {
+    fabAbout.addEventListener("click", () => openModal(modalAbout));
+  }
+})();
+
+</script>
   <style>
     * { box-sizing: border-box; }
 
@@ -409,6 +508,156 @@
   #cell9 td { padding-top: 4px; padding-bottom: 4px; }
   #cell9 .cell-body { max-height: 240px; overflow-y: auto; padding-left: 10px; padding-right: 10px; }
 }
+
+
+/* Floating action buttons (right edge) */
+#fab-stack{
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.fab-btn{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(20,20,20,0.88);
+  color: #fff;
+  font-size: 18px;
+  line-height: 44px;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+.fab-btn:active{ transform: scale(0.98); }
+.fab-btn:focus{ outline: 2px solid rgba(255,255,255,0.35); outline-offset: 2px; }
+
+/* Hide FAB on larger screens where the grid is easy to navigate */
+@media (min-width: 1100px) {
+  #fab-stack{ display: none; }
+}
+
+/* Modal */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 14px;
+}
+
+.modal-card{
+  width: min(560px, 96vw);
+  max-height: 78vh;
+  background: rgba(18,18,18,0.98);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.modal-title{
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.modal-close{
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(40,40,40,0.7);
+  color: #fff;
+  font-size: 22px;
+  line-height: 34px;
+}
+
+.modal-body{
+  padding: 12px;
+  overflow: auto;
+}
+
+.modal-hint{
+  font-size: 12px;
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+
+.panel-picker-list{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.panel-picker-btn{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(28,28,28,0.92);
+  color: #fff;
+  font-size: 14px;
+  text-align: left;
+}
+
+.panel-picker-btn .pp-sub{
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.about-h{
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0.95;
+}
+.about-p{
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.92;
+  margin: 0 0 8px 0;
+}
+.about-ul{
+  margin: 6px 0 0 18px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.92;
+}
+
+@media (max-width: 520px) and (orientation: portrait) {
+  #fab-stack{ right: 8px; }
+  .modal-card{ max-height: 84vh; }
+}
+
+
+body.modal-open{ overflow:hidden; }
 
 </style>
 </head>
@@ -1404,5 +1653,63 @@ window.addEventListener("resize", applyResponsiveDeviceClass);
 
 
 </script>
+
+  <!-- Floating Controls (Phone-friendly) -->
+  <div id="fab-stack" aria-label="Quick controls">
+    <button id="fab-panels" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="panel-picker-modal" title="Panels">☰</button>
+    <button id="fab-about" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="about-modal" title="About">i</button>
+  </div>
+
+  <!-- Panel Picker Modal -->
+  <div id="panel-picker-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="panel-picker-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="panel-picker-title">Panels</div>
+        <button class="modal-close" type="button" data-modal-close="panel-picker-modal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-hint">Tap a panel to jump to it and expand it.</div>
+        <div id="panel-picker-list" class="panel-picker-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="about-title">About</div>
+        <button class="modal-close" type="button" data-modal-close="about-modal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="about-p">
+          This is a standalone, one‑page dashboard for the WXPN “885 Greatest Cover Songs” countdown.
+          It runs entirely in your browser (GitHub Pages) and loads a single JSON data file.
+        </p>
+        <div class="about-section">
+          <div class="about-h">Audio previews</div>
+          <p class="about-p">
+            The Play button uses embedded previews (where available) from Spotify and/or Deezer. No subscriber login is required.
+            If a track isn’t available for embedding, you’ll see a message instead of a player.
+          </p>
+        </div>
+        <div class="about-section">
+          <div class="about-h">Tips</div>
+          <ul class="about-ul">
+            <li>On phones, use the ☰ button to jump to any panel.</li>
+            <li>Tap a panel header’s Hide/Show button to collapse or expand it.</li>
+            <li>Use Detach on the player to keep listening while scrolling (when supported).</li>
+          </ul>
+        </div>
+        <div class="about-section">
+          <div class="about-h">Data & IDs</div>
+          <p class="about-p">
+            Tracks may include MusicBrainz IDs to improve matching across services; these identifiers are open data.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
