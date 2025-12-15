@@ -39,6 +39,14 @@
     closeModal(document.getElementById(id));
   });
 
+  // Direct close button listeners (extra-safe)
+  document.querySelectorAll(".modal-close").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const id = btn.getAttribute("data-modal-close");
+      if (id) closeModal(document.getElementById(id));
+    });
+  });
+
   // ESC closes
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -96,7 +104,10 @@
     fabPanels.addEventListener("click", () => {
       buildPanelList();
       openModal(modalPanel);
-    });
+    }
+  const aboutBtn = document.getElementById("about-btn");
+  if (aboutBtn) { aboutBtn.addEventListener("click", () => openModal(modalAbout)); }
+);
   }
   if (fabAbout) {
     fabAbout.addEventListener("click", () => openModal(modalAbout));
@@ -541,7 +552,7 @@
 
 /* Hide FAB on larger screens where the grid is easy to navigate */
 @media (min-width: 1100px) {
-  #fab-stack{ display: none; }
+  #fab-panels{ display: none; }
 }
 
 /* Modal */
@@ -555,6 +566,7 @@
   justify-content: center;
   padding: 14px;
 }
+.modal-overlay[hidden]{ display: none !important; }
 
 .modal-card{
   width: min(560px, 96vw);
@@ -1657,8 +1669,7 @@ window.addEventListener("resize", applyResponsiveDeviceClass);
   <!-- Floating Controls (Phone-friendly) -->
   <div id="fab-stack" aria-label="Quick controls">
     <button id="fab-panels" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="panel-picker-modal" title="Panels">☰</button>
-    <button id="fab-about" class="fab-btn" type="button" aria-haspopup="dialog" aria-controls="about-modal" title="About">i</button>
-  </div>
+    </div>
 
   <!-- Panel Picker Modal -->
   <div id="panel-picker-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="panel-picker-title" hidden>
