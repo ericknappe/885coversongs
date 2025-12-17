@@ -1,1 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WXPN 885 Cover Network — sigma debug 4</title>
 
+  <!-- Try BOTH common sigma v2 CDN builds -->
+  <script src="https://unpkg.com/graphology@0.25.4/dist/graphology.umd.min.js"></script>
+  <script src="https://unpkg.com/sigma@2.4.0/build/sigma.min.js"></script>
+  <!-- fallback if the above doesn't provide Sigma as global (kept but should be redundant) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/2.4.0/sigma.min.js"></script>
+
+  <style>
+    :root { --bg:#f4f6f8; --panel:#fff; --border:#d7dee6; --text:#1f2a37; --muted:#6b7280; }
+    html, body { height:100%; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    #app { display:grid; grid-template-columns: 340px 1fr; height:100vh; }
+    #sidebar { background:var(--panel); border-right:1px solid var(--border); padding:14px 12px; overflow:auto; }
+    #graphWrap { position:relative; height:100vh; background:#fff; }
+    #graph { position:absolute; inset:0; }
+    #graph canvas { position:absolute !important; inset:0 !important; opacity:1 !important; z-index:2 !important; background:rgba(250,250,250,1) !important; }
+    #overlay { position:absolute; left:10px; top:10px; z-index:10; font-size:12px; color:var(--muted); background:rgba(255,255,255,0.9); border:1px solid var(--border); border-radius:10px; padding:8px 10px; max-width: 95%; }
+    h1 { font-size:16px; margin:0 0 10px; }
+    .hint { font-size:12px; color:var(--muted); line-height:1.35; margin-bottom:10px; }
+    .row { margin:10px 0; }
+    label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+    input, select { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px; font-size:13px; background:#fff; box-sizing:border-box; }
+    .btn { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; cursor:pointer; font-size:12px; }
+    .small { font-size:12px; color:var(--muted); }
+    pre { white-space:pre-wrap; word-break:break-word; font-size:11px; color:#374151; background:#f9fafb; border:1px solid var(--border); padding:8px; border-radius:10px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1>sigma debug 4</h1>
+    <div class="hint">This build forces canvas visibility, and reports canvas sizes/layers. It also includes a 2-node self-test.</div>
+
+    <div class="row">
+      <button class="btn" id="selftest">Run 2-node self-test</button>
+      <div class="small">If self-test is blank, it's a WebGL/render pipeline issue (not your data).</div>
+    </div>
+
+    <div class="row">
+      <label for="center">Center (coverer slug)</label>
+      <input id="center" placeholder="e.g., coverer:johnny-cash" />
+      <div class="small">Leave blank to auto-pick first coverer.</div>
+    </div>
+
+    <div class="row">
+      <button class="btn" id="reload">Load data and render subgraph</button>
+    </div>
+
+    <div class="row">
+      <label>Status</label>
+      <pre id="status">Not started.</pre>
+    </div>
+  </div>
+
+  <div id="graphWrap">
+    <div id="graph"></div>
+    <div id="overlay">Initializing…</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STATUS = document.getElementById("status");
+  const OVERLAY = document.getElementById("overlay");
+  const GRAPH_EL = document.getElementById("graph");
+  const CenterInput = document.getElementById("center");
+
+  function setStatus(o) {
+    const txt = typeof o === "string" ? o : JSON.stringify(o, null, 2);
+    STATUS.textContent = txt;
+    OVERLAY.textContent = (typeof o === "string") ? o : (o.overlay || "Updated.");
+  }
+
+  function getSigmaCtor() {
+    // Most common globals:
+    if (window.Sigma) return window.Sigma;
+    if (window.sigma && window.sigma.Sigma) return window.sigma.Sigma;
+    // Sometimes sigma attaches itself as sigma (function):
+    if (typeof window.sigma === "function") return window.sigma;
+    return null;
+  }
+
+  function webglInfo() {
+    try {
+      const c = document.createElement("canvas");
+      const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+      return { ok: !!gl, renderer: gl ? gl.getParameter(gl.RENDERER) : null, version: gl ? gl.getParameter(gl.VERSION) : null };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  function canvReport() {
+    const canvases = Array.from(GRAPH_EL.querySelectorAll("canvas"));
+    canvases.forEach((c, i) => {
+      c.style.border = "2px solid rgba(220,38,38,0.75)";
+      c.style.opacity = "1";
+      c.style.zIndex = String(2 + i);
+    });
+    const rect = GRAPH_EL.getBoundingClientRect();
+    const crect = canvases.map(c => c.getBoundingClientRect()).map(r => ({w: Math.round(r.width), h: Math.round(r.height)}));
+    return { container: {w: Math.round(rect.width), h: Math.round(rect.height)}, canvasCount: canvases.length, canvasRects: crect };
+  }
+
+  let renderer = null;
+
+  function kill() {
+    if (renderer && renderer.kill) renderer.kill();
+    renderer = null;
+    GRAPH_EL.innerHTML = ""; // remove canvases
+  }
+
+  function renderGraph(graph, centerNodeId) {
+    kill();
+    const SigmaCtor = getSigmaCtor();
+    const wgl = webglInfo();
+    if (!SigmaCtor) {
+      setStatus({ overlay: "Sigma constructor not found on window.", Sigma: !!window.Sigma, sigma: typeof window.sigma, webgl: wgl });
+      return;
+    }
+
+    setStatus({ overlay: "Constructing Sigma…", SigmaCtor: String(SigmaCtor), webgl: wgl });
+
+    // Some sigma builds expect (graph, container, settings)
+    try {
+      renderer = new SigmaCtor(graph, GRAPH_EL, {
+        renderEdgeLabels: false,
+        zIndex: true,
+        labelRenderedSizeThreshold: 10,
+      });
+    } catch (e) {
+      setStatus({ overlay: "Sigma construction threw.", error: String(e), webgl: wgl });
+      return;
+    }
+
+    // After a tick, border canvases & report
+    setTimeout(() => {
+      const rep = canvReport();
+      setStatus({ overlay: `Rendered. ${graph.order} nodes, ${graph.size} edges.`, report: rep, webgl: wgl });
+      if (centerNodeId && renderer.getCamera && graph.hasNode(centerNodeId)) {
+        const p = graph.getNodeAttributes(centerNodeId);
+        renderer.getCamera().animate({ x: p.x, y: p.y, ratio: 0.8 }, { duration: 250 });
+      }
+    }, 60);
+  }
+
+  // Self-test
+  document.getElementById("selftest").addEventListener("click", () => {
+    const Graph = window.graphology;
+    const g = new Graph.Graph();
+    g.addNode("a", { x: 0, y: 0, size: 12, label: "A", color: "#10b981" });
+    g.addNode("b", { x: 1, y: 0, size: 12, label: "B", color: "#a78bfa" });
+    g.addEdge("a", "b", { size: 2, color: "rgba(17,24,39,0.35)" });
+    renderGraph(g, "a");
+  });
+
+  // Data render (subgraph)
+  document.getElementById("reload").addEventListener("click", async () => {
+    setStatus("Fetching coversong_graph_data.json…");
+    let full = null;
+    try {
+      full = await fetch("coversong_graph_data.json").then(r => r.json());
+    } catch (e) {
+      setStatus({ overlay: "Fetch failed.", error: String(e) });
+      return;
+    }
+
+    const Graph = window.graphology;
+    const g = new Graph.Graph();
+
+    // choose center
+    let center = CenterInput.value.trim();
+    if (!center) {
+      const first = (full.nodes || []).find(n => n.type === "coverer");
+      center = first ? first.id : null;
+    }
+    if (!center) {
+      setStatus({ overlay: "No coverer node found to center on." });
+      return;
+    }
+
+    // Index nodes
+    const byId = new Map(full.nodes.map(n => [n.id, n]));
+
+    // Build tiny 2-hop neighborhood around center (25ish nodes)
+    const out = new Map();
+    const inn = new Map();
+    full.nodes.forEach(n => { out.set(n.id, []); inn.set(n.id, []); });
+    full.edges.forEach(e => { if (out.has(e.source)) out.get(e.source).push(e); if (inn.has(e.target)) inn.get(e.target).push(e); });
+
+    const nodeSet = new Set([center]);
+    const edgeSet = new Set();
+
+    const songs = [];
+    (out.get(center) || []).forEach(e => {
+      if (e.type === "coverer_to_song") {
+        nodeSet.add(e.target);
+        edgeSet.add(e.source + "->" + e.target + "|" + e.type);
+        songs.push(e.target);
+      }
+    });
+
+    songs.forEach(sid => {
+      (out.get(sid) || []).forEach(e => {
+        if (e.type === "song_to_orig") {
+          nodeSet.add(e.target);
+          edgeSet.add(e.source + "->" + e.target + "|" + e.type);
+        }
+      });
+    });
+
+    nodeSet.forEach(id => {
+      const n = byId.get(id);
+      if (!n) return;
+      g.addNode(id, {
+        x: n.x, y: n.y, size: n.size,
+        label: n.label,
+        color: (n.type === "coverer") ? "#10b981" : (n.type === "song") ? "#06b6d4" : "#a78bfa"
+      });
+    });
+
+    full.edges.forEach(e => {
+      const key = e.source + "->" + e.target + "|" + e.type;
+      if (!edgeSet.has(key)) return;
+      if (!g.hasNode(e.source) || !g.hasNode(e.target)) return;
+      try { g.addDirectedEdgeWithKey(key, e.source, e.target, { size: 1, color: "rgba(17,24,39,0.35)" }); } catch (_) {}
+    });
+
+    renderGraph(g, center);
+  });
+
+  // Auto-run a self-test first so you can immediately see if anything draws:
+  document.getElementById("selftest").click();
+})();
+</script>
+</body>
+</html>
